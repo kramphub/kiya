@@ -4,6 +4,17 @@
 
 Kiya is a tool to access secrets stored in a Google Bucket and encrypted by Google Key Management Service (KMS).
 
+
+### Introduction
+Developing and deploying applications to execution environments (dev,staging,production) requires all kinds of secrets.
+Both continuous development enviroment and production environment require credentials to access other resources.
+Examples are passwords, service accounts, TLS certificates, API tokens and Encryption Keys. 
+These secrets should be managed with great care.
+This means secrets must be stored encrypted on reliable shared storages and its access must controlled by AAA (authentication,authorisation and auditing).
+
+**Kiya** is a simple tool that mediates between stored encrypted secrets in a bucket and a managed encyrption key in a keyring. It requires an authenticated Google account and persmissions for that account to read secrets and perform en(de-)cryption.
+
+#### Labeled secrets
 A secret must have a label and a plain text representation of its value.
 A label is typically composed of a domain or site or application (the parent key) and a secret key, e.g. google.gmail/info@mars.planets.
 A label must have at least one parent key (lowercase with or without dots).
@@ -14,6 +25,7 @@ Kiya uses your authenticated Google account to access the Storage Bucket, KMS an
 The bucket stores the encrypted secret value using the label as the storage key.
 
 	gcloud auth application-default login
+			
 	
 ## Usage
 
