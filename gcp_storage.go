@@ -11,6 +11,9 @@ import (
 
 func storeSecret(storageService *cloudstore.Client, target profile, key, encryptedValue string) error {
 	bucket := storageService.Bucket(target.Bucket)
+	if _, err := bucket.Attrs(context.Background()); err != nil {
+		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
+	}
 	w := bucket.Object(key).NewWriter(context.Background())
 	defer w.Close()
 	_, err := fmt.Fprintf(w, encryptedValue)
@@ -19,6 +22,9 @@ func storeSecret(storageService *cloudstore.Client, target profile, key, encrypt
 
 func deleteSecret(storageService *cloudstore.Client, target profile, key string) error {
 	bucket := storageService.Bucket(target.Bucket)
+	if _, err := bucket.Attrs(context.Background()); err != nil {
+		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
+	}
 	if err := bucket.Object(key).Delete(context.Background()); err != nil {
 		return tre.New(err, "failed to delete secret", "key", key)
 	}
