@@ -35,7 +35,7 @@ func main() {
 	profileName := flag.Arg(0)
 	target, ok := profiles[profileName]
 	if !ok {
-		log.Fatalf("no such profile [%s] please check your .kiya.json file", profileName)
+		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
 	// what command?
 	switch flag.Arg(1) {
