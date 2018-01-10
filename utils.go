@@ -11,6 +11,8 @@ import (
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
 	cloudkms "google.golang.org/api/cloudkms/v1"
+	"math/big"
+	"crypto/rand"
 )
 
 func getValueByKey(kmsService *cloudkms.Service, storageService *cloudstore.Client, key string, target profile) (string, error) {
@@ -45,4 +47,19 @@ func promptForYes(message string) bool {
 	fmt.Print(message)
 	yn, _ := reader.ReadString('\n')
 	return strings.HasPrefix(yn, "Y") || strings.HasPrefix(yn, "y")
+}
+
+func generate_secret(length int) (string, error) {
+	chars := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()_+`-={}|[]\\:\"<>?,./"
+	randomString := make([]byte, length)
+
+	for i := 0; i < length; i ++ {
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(len(chars))))
+		if err != nil {
+			return "", err
+		}
+		randomString[i] = chars[n.Int64()]
+	}
+
+	return string(randomString), nil
 }
