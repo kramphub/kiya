@@ -35,12 +35,12 @@ func loadSecret(storageService *cloudstore.Client, target profile, key string) (
 	bucket := storageService.Bucket(target.Bucket)
 	r, err := bucket.Object(key).NewReader(context.Background())
 	if err != nil {
-		return "", tre.New(err, "failed to get bucket", "key", key)
+		return "", tre.New(err, "failed to get bucket", "profile", target.Label, "key", key)
 	}
 	defer r.Close()
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
-		return "", tre.New(err, "reading encrypted value failed", "key", key)
+		return "", tre.New(err, "reading encrypted value failed", "profile", target.Label, "key", key)
 	}
 	return string(data), nil
 }

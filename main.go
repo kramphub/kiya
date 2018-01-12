@@ -24,7 +24,7 @@ func main() {
 		os.Exit(0)
 	}
 	if len(flag.Args()) < 2 {
-		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste] [|parent/key] [|value] [|template-filename] [|secret-length]")
+		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
 		flag.PrintDefaults()
 		os.Exit(0)
@@ -94,11 +94,22 @@ func main() {
 		fmt.Println(value)
 
 	case "delete":
-		command_delete(kmsService, storageService, target)
+		key := flag.Arg(2)
+		command_delete(kmsService, storageService, target, key)
 	case "list":
 		command_list(storageService, target)
 	case "template":
 		command_template(kmsService, storageService, target)
+	case "move":
+		// kiya [source] move [source-key] [target] [|target-key]
+		sourceProfile := profiles[flag.Arg(0)]
+		sourceKey := flag.Arg(2)
+		targetProfile := profiles[flag.Arg(3)]
+		targetKey := sourceKey
+		if len(flag.Args()) == 5 {
+			targetKey = flag.Arg(4)
+		}
+		command_move(kmsService, storageService, sourceProfile, sourceKey, targetProfile, targetKey)
 	default:
 		fmt.Println("unknown command", flag.Arg(1))
 	}
