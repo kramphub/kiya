@@ -20,7 +20,7 @@ func command_move(
 	// fetch value for key from source
 	sourceValue, err := getValueByKey(kmsService, storageService, sourceKey, source)
 	if err != nil {
-		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey, "err", err))
+		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey))
 	}
 	// store value for key to target
 	command_put_paste(kmsService, storageService, target, "put", targetKey, sourceValue)
