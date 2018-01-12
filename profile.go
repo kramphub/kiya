@@ -16,7 +16,7 @@ type profile struct {
 	Keyring     string
 	CryptoKey   string
 	Bucket      string
-	SecretChars string
+	SecretRunes []rune
 }
 
 func load() (profs map[string]profile, err error) {

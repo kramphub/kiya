@@ -69,7 +69,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		secret, err := generate_secret(secretLength, target.SecretChars)
+		secret, err := GenerateSecret(secretLength, target.SecretRunes)
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
