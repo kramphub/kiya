@@ -55,6 +55,12 @@ If a password was already stored then you will be warned about overwriting it.
 
 _Note: this will put a secret in your command history; better use paste, see below._
 
+### Generate a password, _generate_
+
+	kiya teamF1 generate concourse/cd-pipeline 25
+
+Generate a secret with length 25
+
 ### Retrieve a password, _get_
 
 	kiya teamF1 get concourse/cd-pipeline

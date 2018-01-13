@@ -10,12 +10,13 @@ import (
 var profiles map[string]profile
 
 type profile struct {
-	Label     string
-	ProjectID string
-	Location  string
-	Keyring   string
-	CryptoKey string
-	Bucket    string
+	Label       string
+	ProjectID   string
+	Location    string
+	Keyring     string
+	CryptoKey   string
+	Bucket      string
+	SecretRunes []rune
 }
 
 func load() (profs map[string]profile, err error) {

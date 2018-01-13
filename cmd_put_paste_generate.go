@@ -9,7 +9,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func command_put_paste(kmsService *cloudkms.Service, storageService *cloudstore.Client,
+func command_put_paste_generate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
 	target profile, command, key, value string) {
 	// check for exists
 	_, err := loadSecret(storageService, target, key)

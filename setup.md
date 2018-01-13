@@ -36,7 +36,8 @@ In your .kiya file, add a new personal profile.
         "location": "global",
         "keyring": "kiya-keyring",
         "cryptoKey": "kiya-cryptokey",
-        "bucket": "your-name-kiya-secrets"
+        "bucket": "your-name-kiya-secrets",
+        "secretChars": "optionally-specify-secret-generation-chars"
     }	
 
 ### Test
