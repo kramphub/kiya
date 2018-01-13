@@ -24,7 +24,7 @@ func main() {
 		os.Exit(0)
 	}
 	if len(flag.Args()) < 2 {
-		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move] [|parent/key] [|value] [|template-filename] [|secret-length]")
+		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
 		flag.PrintDefaults()
 		os.Exit(0)

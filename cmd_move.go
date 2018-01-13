@@ -23,7 +23,7 @@ func command_move(
 		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey))
 	}
 	// store value for key to target
-	command_put_paste(kmsService, storageService, target, "put", targetKey, sourceValue)
+	command_put_paste_generate(kmsService, storageService, target, "put", targetKey, sourceValue)
 	// delete key from source
 	command_delete(kmsService, storageService, source, sourceKey)
 }
