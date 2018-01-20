@@ -20,6 +20,7 @@ var version = "v1.2.0"
 
 func main() {
 	flag.Parse()
+	loadConfiguration()
 	if *oVersion {
 		fmt.Println("kiya version", version)
 		os.Exit(0)

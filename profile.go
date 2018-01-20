@@ -43,7 +43,7 @@ func configLocation() string {
 	return location
 }
 
-func init() {
+func loadConfiguration() {
 	profs, err := load()
 	if err != nil {
 		log.Fatal("unable to read/parse kiya configration file ("+configLocation()+")", err)
