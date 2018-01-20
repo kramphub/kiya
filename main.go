@@ -8,14 +8,15 @@ import (
 
 	"github.com/atotto/clipboard"
 
+	"strconv"
+
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
 	"golang.org/x/net/context"
 	cloudkms "google.golang.org/api/cloudkms/v1"
-	"strconv"
 )
 
-const version = "1.0.0"
+var version = "v1.2.0"
 
 func main() {
 	flag.Parse()
