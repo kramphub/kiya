@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -92,6 +93,12 @@ func main() {
 		value, err := getValueByKey(kmsService, storageService, key, target)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+		}
+		if len(*oOutputFilename) > 0 {
+			if err := ioutil.WriteFile(*oOutputFilename, []byte(value), os.ModePerm); err != nil {
+				log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+			}
+			return
 		}
 		fmt.Println(value)
 

@@ -8,4 +8,5 @@ var (
 	oConfigFilename = flag.String("c", "", "location of the configuration file. If empty then expect .kiya in $HOME.")
 	oAuthLocation   = flag.String("a", "", "location of the JSON key credentials file. If empty then use the Google Application Defaults.")
 	oVersion        = flag.Bool("version", false, "show the version of the tool")
+	oOutputFilename = flag.String("o", "", "if not empty then write the secret to a file else write to stdout (get)")
 )
