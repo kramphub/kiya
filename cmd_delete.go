@@ -9,7 +9,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func command_delete(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile, key string) {
+func commandDelete(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile, key string) {
 	_, err := getValueByKey(kmsService, storageService, key, target)
 	if err != nil {
 		log.Fatal(tre.New(err, "delete failed", "key", key, "err", err))

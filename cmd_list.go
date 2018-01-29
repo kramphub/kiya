@@ -13,7 +13,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func command_list(storageService *cloudstore.Client, target profile) {
+func commandList(storageService *cloudstore.Client, target profile) {
 	ctx := context.Background()
 	bucket := storageService.Bucket(target.Bucket)
 	query := &cloudstore.Query{}

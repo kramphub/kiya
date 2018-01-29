@@ -8,8 +8,8 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-// command_move transfers a secret from a source to a target profile.
-func command_move(
+// commandMove transfers a secret from a source to a target profile.
+func commandMove(
 	kmsService *cloudkms.Service,
 	storageService *cloudstore.Client,
 	source profile,
@@ -23,7 +23,7 @@ func command_move(
 		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey))
 	}
 	// store value for key to target
-	command_put_paste_generate(kmsService, storageService, target, "put", targetKey, sourceValue)
+	commandPutPasteGenerate(kmsService, storageService, target, "put", targetKey, sourceValue)
 	// delete key from source
-	command_delete(kmsService, storageService, source, sourceKey)
+	commandDelete(kmsService, storageService, source, sourceKey)
 }

@@ -17,7 +17,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.3.0"
+var version = "v1.3.1"
 
 func main() {
 	flag.Parse()
@@ -53,7 +53,7 @@ func main() {
 	case "put":
 		key := flag.Arg(2)
 		value := valueOrReadFrom(flag.Arg(3), os.Stdin)
-		command_put_paste_generate(kmsService, storageService, target, "put", key, value)
+		commandPutPasteGenerate(kmsService, storageService, target, "put", key, value)
 
 	case "paste":
 		key := flag.Arg(2)
@@ -62,7 +62,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		command_put_paste_generate(kmsService, storageService, target, "paste", key, value)
+		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value)
 
 	case "generate":
 		key := flag.Arg(2)
@@ -76,7 +76,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		command_put_paste_generate(kmsService, storageService, target, "generate", key, secret)
+		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret)
 
 	case "copy":
 		key := flag.Arg(2)
@@ -104,11 +104,11 @@ func main() {
 
 	case "delete":
 		key := flag.Arg(2)
-		command_delete(kmsService, storageService, target, key)
+		commandDelete(kmsService, storageService, target, key)
 	case "list":
-		command_list(storageService, target)
+		commandList(storageService, target)
 	case "template":
-		command_template(kmsService, storageService, target)
+		commandTemplate(kmsService, storageService, target)
 	case "move":
 		// kiya [source] move [source-key] [target] [|target-key]
 		sourceProfile := profiles[flag.Arg(0)]
@@ -118,7 +118,7 @@ func main() {
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)
 		}
-		command_move(kmsService, storageService, sourceProfile, sourceKey, targetProfile, targetKey)
+		commandMove(kmsService, storageService, sourceProfile, sourceKey, targetProfile, targetKey)
 	default:
 		fmt.Println("unknown command", flag.Arg(1))
 	}

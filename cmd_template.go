@@ -13,7 +13,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func command_template(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile) {
+func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile) {
 	funcMap := template.FuncMap{
 		"kiya": templateFunction(kmsService, storageService, target),
 		"base64": func(value string) string {
@@ -22,19 +22,29 @@ func command_template(kmsService *cloudkms.Service, storageService *cloudstore.C
 	}
 	processor := template.New("base").Funcs(funcMap)
 	filename := flag.Arg(2)
+	writer := os.Stdout
+	// change writer is output was specified
+	if len(*oOutputFilename) > 0 {
+		out, err := os.Create(*oOutputFilename)
+		if err != nil {
+			log.Fatal("unable to create output", err)
+		}
+		writer = out
+	}
+	defer writer.Close()
 	if len(filename) > 0 {
 		processor, err := processor.ParseFiles(filename)
 		if err != nil {
 			log.Fatal(tre.New(err, "templating failed", "filename", filename))
 		}
-		processor.ExecuteTemplate(os.Stdout, filepath.Base(filename), "")
+		processor.ExecuteTemplate(writer, filepath.Base(filename), "")
 	} else {
 		templateContent := valueOrReadFrom(filename, os.Stdin)
 		processor, err := processor.Parse(templateContent)
 		if err != nil {
 			log.Fatal("templating failed", err)
 		}
-		processor.ExecuteTemplate(os.Stdout, "base", "")
+		processor.ExecuteTemplate(writer, "base", "")
 	}
 }
 
