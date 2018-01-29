@@ -21,7 +21,23 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 		},
 	}
 	processor := template.New("base").Funcs(funcMap)
+	templateName := "base"
 	filename := flag.Arg(2)
+	if len(filename) > 0 {
+		t, err := processor.ParseFiles(filename)
+		if err != nil {
+			log.Fatal(tre.New(err, "templating failed", "filename", filename))
+		}
+		processor = t
+		templateName = filepath.Base(filename)
+	} else {
+		templateContent := valueOrReadFrom(filename, os.Stdin)
+		t, err := processor.Parse(templateContent)
+		if err != nil {
+			log.Fatal("templating failed", err)
+		}
+		processor = t
+	}
 	writer := os.Stdout
 	// change writer is output was specified
 	if len(*oOutputFilename) > 0 {
@@ -32,20 +48,7 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 		writer = out
 	}
 	defer writer.Close()
-	if len(filename) > 0 {
-		processor, err := processor.ParseFiles(filename)
-		if err != nil {
-			log.Fatal(tre.New(err, "templating failed", "filename", filename))
-		}
-		processor.ExecuteTemplate(writer, filepath.Base(filename), "")
-	} else {
-		templateContent := valueOrReadFrom(filename, os.Stdin)
-		processor, err := processor.Parse(templateContent)
-		if err != nil {
-			log.Fatal("templating failed", err)
-		}
-		processor.ExecuteTemplate(writer, "base", "")
-	}
+	processor.ExecuteTemplate(writer, templateName, "")
 }
 
 func templateFunction(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile) func(string) string {

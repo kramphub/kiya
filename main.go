@@ -17,7 +17,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.3.1"
+var version = "v1.3.3"
 
 func main() {
 	flag.Parse()
