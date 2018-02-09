@@ -6,7 +6,7 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,

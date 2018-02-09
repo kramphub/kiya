@@ -22,6 +22,7 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	}
 	processor := template.New("base").Funcs(funcMap)
 	templateName := "base"
+
 	filename := flag.Arg(2)
 	if len(filename) > 0 {
 		t, err := processor.ParseFiles(filename)
@@ -31,7 +32,7 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 		processor = t
 		templateName = filepath.Base(filename)
 	} else {
-		templateContent := valueOrReadFrom(filename, os.Stdin)
+		templateContent := readFromStdIn()
 		t, err := processor.Parse(templateContent)
 		if err != nil {
 			log.Fatal("templating failed", err)

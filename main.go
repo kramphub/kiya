@@ -14,7 +14,7 @@ import (
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
 	"golang.org/x/net/context"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 var version = "v1.3.3"
@@ -52,7 +52,12 @@ func main() {
 
 	case "put":
 		key := flag.Arg(2)
-		value := valueOrReadFrom(flag.Arg(3), os.Stdin)
+		var value string
+		if len(flag.Arg(3)) != 0 {
+			value = flag.Arg(3)
+		} else {
+			value = readFromStdIn()
+		}
 		commandPutPasteGenerate(kmsService, storageService, target, "put", key, value)
 
 	case "paste":
@@ -66,9 +71,14 @@ func main() {
 
 	case "generate":
 		key := flag.Arg(2)
-		value := valueOrReadFrom(flag.Arg(3), os.Stdin)
+		var length string
+		if len(flag.Arg(3)) != 0 {
+			length = flag.Arg(3)
+		} else {
+			length = readFromStdIn()
+		}
 
-		secretLength, err := strconv.Atoi(value)
+		secretLength, err := strconv.Atoi(length)
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
