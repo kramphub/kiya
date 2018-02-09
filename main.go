@@ -52,13 +52,12 @@ func main() {
 
 	case "put":
 		key := flag.Arg(2)
-		var value string
 		if len(flag.Arg(3)) != 0 {
-			value = flag.Arg(3)
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, flag.Arg(3), true)
 		} else {
-			value = readFromStdIn()
+			value := readFromStdIn()
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, false)
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "put", key, value)
 
 	case "paste":
 		key := flag.Arg(2)
@@ -67,15 +66,18 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value)
+		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value, true)
 
 	case "generate":
 		key := flag.Arg(2)
 		var length string
+		var prompt bool
 		if len(flag.Arg(3)) != 0 {
 			length = flag.Arg(3)
+			prompt = true
 		} else {
 			length = readFromStdIn()
+			prompt = false
 		}
 
 		secretLength, err := strconv.Atoi(length)
@@ -86,7 +88,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret)
+		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, prompt)
 
 	case "copy":
 		key := flag.Arg(2)
