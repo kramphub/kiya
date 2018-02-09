@@ -39,6 +39,12 @@ func valueOrReadFrom(value string, file *os.File) string {
 	if err != nil {
 		log.Fatal("Error while reading from file", file, err)
 	}
+
+	// remove newline added to std in from command execution
+	if buffer[len(buffer)-1] == '\n' {
+		buffer = buffer[:len(buffer)-1]
+	}
+
 	return string(buffer)
 }
 
