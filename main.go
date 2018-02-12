@@ -19,6 +19,11 @@ import (
 
 var version = "v1.3.3"
 
+const (
+	doPrompt    = true
+	doNotPrompt = false
+)
+
 func main() {
 	flag.Parse()
 	loadConfiguration()
@@ -52,11 +57,12 @@ func main() {
 
 	case "put":
 		key := flag.Arg(2)
-		if len(flag.Arg(3)) != 0 {
-			commandPutPasteGenerate(kmsService, storageService, target, "put", key, flag.Arg(3), true)
+		value := flag.Arg(3)
+		if len(value) != 0 {
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doPrompt)
 		} else {
-			value := readFromStdIn()
-			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, false)
+			value = readFromStdIn()
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doNotPrompt)
 		}
 
 	case "paste":
@@ -66,18 +72,20 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value, true)
+		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value, doPrompt)
 
 	case "generate":
 		key := flag.Arg(2)
+		value := flag.Arg(3)
+
 		var length string
-		var prompt bool
-		if len(flag.Arg(3)) != 0 {
-			length = flag.Arg(3)
-			prompt = true
+		var mustPrompt bool
+		if len(value) != 0 {
+			length = value
+			mustPrompt = true
 		} else {
 			length = readFromStdIn()
-			prompt = false
+			mustPrompt = false
 		}
 
 		secretLength, err := strconv.Atoi(length)
@@ -88,7 +96,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, prompt)
+		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, mustPrompt)
 
 	case "copy":
 		key := flag.Arg(2)

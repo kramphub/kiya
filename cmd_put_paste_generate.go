@@ -10,11 +10,11 @@ import (
 )
 
 func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
-	target profile, command, key, value string, prompt bool) {
+	target profile, command, key, value string, mustPrompt bool) {
 	// check for exists
 	_, err := loadSecret(storageService, target, key)
 	if err == nil {
-		if prompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
+		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
 			fmt.Println(command + " aborted")
 			return
 		}
