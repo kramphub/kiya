@@ -14,10 +14,15 @@ import (
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
 	"golang.org/x/net/context"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 var version = "v1.3.3"
+
+const (
+	doPrompt    = true
+	doNotPrompt = false
+)
 
 func main() {
 	flag.Parse()
@@ -52,8 +57,13 @@ func main() {
 
 	case "put":
 		key := flag.Arg(2)
-		value := valueOrReadFrom(flag.Arg(3), os.Stdin)
-		commandPutPasteGenerate(kmsService, storageService, target, "put", key, value)
+		value := flag.Arg(3)
+		if len(value) != 0 {
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doPrompt)
+		} else {
+			value = readFromStdIn()
+			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doNotPrompt)
+		}
 
 	case "paste":
 		key := flag.Arg(2)
@@ -62,13 +72,23 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value)
+		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value, doPrompt)
 
 	case "generate":
 		key := flag.Arg(2)
-		value := valueOrReadFrom(flag.Arg(3), os.Stdin)
+		value := flag.Arg(3)
 
-		secretLength, err := strconv.Atoi(value)
+		var length string
+		var mustPrompt bool
+		if len(value) != 0 {
+			length = value
+			mustPrompt = true
+		} else {
+			length = readFromStdIn()
+			mustPrompt = false
+		}
+
+		secretLength, err := strconv.Atoi(length)
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
@@ -76,7 +96,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret)
+		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, mustPrompt)
 
 	case "copy":
 		key := flag.Arg(2)

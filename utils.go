@@ -30,15 +30,18 @@ func getValueByKey(kmsService *cloudkms.Service, storageService *cloudstore.Clie
 	return decryptedValue, nil
 }
 
-// valueOrReadFrom returns the value argument if not empty or the contents of the file argument if empty.
-func valueOrReadFrom(value string, file *os.File) string {
-	if len(value) != 0 {
-		return value
-	}
-	buffer, err := ioutil.ReadAll(file)
+// readFromStdIn tries to read tries to read required input from standard in
+func readFromStdIn() string {
+	buffer, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		log.Fatal("Error while reading from file", file, err)
+		log.Fatal("Error while reading from standard in", err)
 	}
+
+	// remove newline added to std in from command execution
+	if buffer[len(buffer)-1] == '\n' {
+		buffer = buffer[:len(buffer)-1]
+	}
+
 	return string(buffer)
 }
 
