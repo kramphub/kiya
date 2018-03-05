@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.3.3"
+var version = "v1.3.4"
 
 const (
 	doPrompt    = true
@@ -26,11 +26,11 @@ const (
 
 func main() {
 	flag.Parse()
-	loadConfiguration()
 	if *oVersion {
 		fmt.Println("kiya version", version)
 		os.Exit(0)
 	}
+	loadConfiguration()
 	if len(flag.Args()) < 2 {
 		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
