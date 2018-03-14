@@ -23,7 +23,7 @@ func getDecryptedValue(kmsService *cloudkms.Service, target profile, cipherText 
 	}
 	data, err := base64.StdEncoding.DecodeString(resp.Plaintext)
 	if err != nil {
-		return "", tre.New(err, "failed to base64 decode", "base64", resp.Plaintext)
+		return "", tre.New(err, "failed to base64 decode")
 	}
 	return string(data), nil
 }
@@ -39,7 +39,7 @@ func getEncryptedValue(kmsService *cloudkms.Service, target profile, plainText s
 		target.CryptoKey)
 	resp, err := kmsService.Projects.Locations.KeyRings.CryptoKeys.Encrypt(path, encryptReq).Do()
 	if err != nil {
-		return "", tre.New(err, "failed to encrypt", "plainText", plainText)
+		return "", tre.New(err, "failed to encrypt")
 	}
 	return resp.Ciphertext, nil
 }

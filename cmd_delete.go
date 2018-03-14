@@ -21,6 +21,6 @@ func commandDelete(kmsService *cloudkms.Service, storageService *cloudstore.Clie
 			fmt.Printf("successfully deleted [%s] from [%s]\n", key, target.Label)
 		}
 	} else {
-		fmt.Println("delete aborted")
+		log.Fatalln("delete aborted")
 	}
 }

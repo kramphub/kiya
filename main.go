@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.3.4"
+var version = "v1.3.5"
 
 const (
 	doPrompt    = true
@@ -97,6 +97,8 @@ func main() {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
 		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, mustPrompt)
+		// make it available on the clipboard, ignore error
+		clipboard.WriteAll(secret)
 
 	case "copy":
 		key := flag.Arg(2)

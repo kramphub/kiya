@@ -1,10 +1,11 @@
 package main
 
 import (
-	"testing"
-	"regexp"
-	"fmt"
 	"bytes"
+	"fmt"
+	"net/url"
+	"regexp"
+	"testing"
 	"unicode/utf8"
 )
 
@@ -27,17 +28,17 @@ func TestGenerateSecret(t *testing.T) {
 	}
 }
 
-func TestGenerateSecretDefaultChars(t *testing.T) {
-	var testCases = []struct {
-		length int
-	}{
-		{0},
-		{1},
-		{50},
-		{100000},
+func TestURLEncodingFreeCharset(t *testing.T) {
+	v := url.Values{}
+	v.Set("test", defaultSecreteCharSet)
+	if got, want := v.Encode(), "test="+defaultSecreteCharSet; got != want {
+		t.Error("got [%s] want [%s]", got, want)
 	}
-	for _, tc := range testCases {
-		testGenerateSecret(t, tc.length, "", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*()_+`-={}|[]\\:\"<>?,./")
+}
+
+func TestGenerateSecretDefaultChars(t *testing.T) {
+	for _, each := range []int{0, 1, 50, 100000} {
+		testGenerateSecret(t, each, "", defaultSecreteCharSet)
 	}
 }
 

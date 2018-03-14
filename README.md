@@ -59,7 +59,7 @@ _Note: this will put a secret in your command history; better use paste, see bel
 
 	kiya teamF1 generate concourse/cd-pipeline 25
 
-Generate a secret with length 25
+Generate a secret with length 25 store it as secret `concourse/cd-pipeline` and copy its value to the OS clipboard.
 
 ### Retrieve a password, _get_
 

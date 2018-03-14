@@ -15,7 +15,7 @@ func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloud
 	_, err := loadSecret(storageService, target, key)
 	if err == nil {
 		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
-			fmt.Println(command + " aborted")
+			log.Fatalln(command + " aborted")
 			return
 		}
 	}
@@ -24,6 +24,6 @@ func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloud
 		log.Fatal(tre.New(err, command+" failed", "key", key, "value", value))
 	}
 	if err := storeSecret(storageService, target, key, encryptedValue); err != nil {
-		log.Fatal(tre.New(err, command+" failed", "key", key, "value", value, "encryptedValue", encryptedValue))
+		log.Fatal(tre.New(err, command+" failed", "key", key, "encryptedValue", encryptedValue))
 	}
 }
