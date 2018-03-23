@@ -93,9 +93,9 @@ Kiya also provides a builtin function for base64 encoding.
 
 	kiya teamF1 paste google/accounts/someone@gmail.com
 
-### Move a secret from on profile to another, _move_
+### Move a secret from one profile to another, _move_
 
-	kiya teamF1 move bitbucket.org/johndoe teamF2	
+    kiya teamF1 move bitbucket.org/johndoe teamF2
 
 ## Troubleshooting
 
