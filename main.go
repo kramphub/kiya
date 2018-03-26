@@ -128,7 +128,9 @@ func main() {
 		key := flag.Arg(2)
 		commandDelete(kmsService, storageService, target, key)
 	case "list":
-		commandList(storageService, target)
+		// kiya [profile] list [|filter-term]
+		filter := flag.Arg(2)
+		commandList(storageService, target, filter)
 	case "template":
 		commandTemplate(kmsService, storageService, target)
 	case "move":
