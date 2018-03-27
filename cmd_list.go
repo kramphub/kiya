@@ -29,7 +29,7 @@ func commandList(storageService *cloudstore.Client, target profile, filter strin
 		} else if err != nil {
 			log.Fatal(tre.New(err, "list failed"))
 		}
-		if filter != "" {
+		if len(filter) > 0 {
 			if !caseInsensitiveContains(next.Name, filter) {
 				filteredCount++
 				continue
@@ -38,8 +38,8 @@ func commandList(storageService *cloudstore.Client, target profile, filter strin
 		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, next.Name), next.Created.Format(time.RFC822), next.Owner})
 	}
 
-	if filter != "" {
-		fmt.Printf("Showing %d key(s) matching '%s', skipped %d keys\n", len(data), filter, filteredCount)
+	if len(filter) > 0 {
+		fmt.Printf("Showing %d key(s) matching '%s', skipped %d key(s)\n", len(data), filter, filteredCount)
 	}
 
 	table := tablewriter.NewWriter(os.Stdout)
