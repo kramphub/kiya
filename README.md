@@ -69,7 +69,9 @@ _Note: this will put a secret in your command history; better use copy, see belo
 
 ### List labels of stored secrets, _list_
 
-	kiya teamF1 list
+	kiya teamF1 list [|filter]
+
+Specifying a filter argument will hide any keys that don't contain the filter string.
 
 ### Fill a template, _template_
 
