@@ -1,3 +1,6 @@
+### 1.4.0
+- add filter for list operation (thanks Tom Geurtsen)
+
 ### 1.3.5
 - default generate character set is made URL encoding free
 - after generate password copy it to clipboard
