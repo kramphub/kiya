@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	cloudstore "cloud.google.com/go/storage"
@@ -24,6 +25,7 @@ func commandMove(
 	}
 	// store value for key to target
 	commandPutPasteGenerate(kmsService, storageService, target, "put", targetKey, sourceValue, true)
+	fmt.Printf("Successfully copied [%s] to [%s]\n", sourceKey, target.Label)
 	// delete key from source
 	commandDelete(kmsService, storageService, source, sourceKey)
 }

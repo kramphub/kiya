@@ -17,7 +17,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.4.0"
+var version = "v1.4.1"
 
 const (
 	doPrompt    = true

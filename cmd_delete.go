@@ -18,7 +18,7 @@ func commandDelete(kmsService *cloudkms.Service, storageService *cloudstore.Clie
 		if err := deleteSecret(storageService, target, key); err != nil {
 			fmt.Printf("failed to delete [%s] from [%s] because [%v]\n", key, target.Label, err)
 		} else {
-			fmt.Printf("successfully deleted [%s] from [%s]\n", key, target.Label)
+			fmt.Printf("Successfully deleted [%s] from [%s]\n", key, target.Label)
 		}
 	} else {
 		log.Fatalln("delete aborted")
