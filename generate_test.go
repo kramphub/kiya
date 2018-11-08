@@ -32,7 +32,7 @@ func TestURLEncodingFreeCharset(t *testing.T) {
 	v := url.Values{}
 	v.Set("test", defaultSecreteCharSet)
 	if got, want := v.Encode(), "test="+defaultSecreteCharSet; got != want {
-		t.Error("got [%s] want [%s]", got, want)
+		t.Errorf("got [%s] want [%s]", got, want)
 	}
 }
 
