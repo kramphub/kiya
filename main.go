@@ -35,7 +35,7 @@ func main() {
 		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
 		flag.PrintDefaults()
-		os.Exit(0)
+		os.Exit(1)
 	}
 	// Create the KMS client.
 	kmsService, err := cloudkms.New(newAuthenticatedClient())
