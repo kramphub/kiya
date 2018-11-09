@@ -10,11 +10,10 @@ releasegen:
 # export GITHUB_TOKEN=...
 createrelease:
 	github-release info -u kramphub -r kiya
-	TAG=$(git tag -l --points-at HEAD)
 	github-release release \
 		--user kramphub \
 		--repo kiya \
-		--tag $(TAG) \
+		--tag $(shell git describe --abbrev=0 --tags) \
 		--name "kiya" \
 		--description "Kiya - secrets management tool"
 
@@ -22,20 +21,20 @@ uploadrelease:
 	github-release upload \
 		--user kramphub \
 		--repo kiya \
-		--tag $(shell git tag -l --points-at HEAD) \
+		--tag $(shell git describe --abbrev=0 --tags) \
 		--name "kiya-Linux-x86_64" \
 		--file release/kiya-Linux-x86_64
 
 	github-release upload \
 		--user kramphub \
 		--repo kiya \
-		--tag $(shell git tag -l --points-at HEAD) \
+		--tag $(shell git describe --abbrev=0 --tags) \
 		--name "kiya-Windows-x86_64" \
 		--file release/kiya-Windows-x86_64
 
 	github-release upload \
 		--user kramphub \
 		--repo kiya \
-		--tag $(shell git tag -l --points-at HEAD) \
+		--tag $(shell git describe --abbrev=0 --tags) \
 		--name "kiya-Darwin-x86_64" \
 		--file release/kiya-Darwin-x86_64
