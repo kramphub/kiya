@@ -21,7 +21,7 @@ func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloud
 	}
 	encryptedValue, err := getEncryptedValue(kmsService, target, value)
 	if err != nil {
-		log.Fatal(tre.New(err, command+" failed", "key", key, "value", value))
+		log.Fatal(tre.New(err, command+" failed", "key", key))
 	}
 	if err := storeSecret(storageService, target, key, encryptedValue); err != nil {
 		log.Fatal(tre.New(err, command+" failed", "key", key, "encryptedValue", encryptedValue))
