@@ -9,6 +9,7 @@ goos() {
   case "${1}" in
     Darwin) echo darwin ;;
     Linux) echo linux ;;
+    Windows) echo windows ;;
     *) return 1 ;;
   esac
 }

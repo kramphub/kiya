@@ -14,6 +14,27 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+func keyAtListIndex(storageService *cloudstore.Client, target profile, index int) string {
+	ctx := context.Background()
+	bucket := storageService.Bucket(target.Bucket)
+	query := &cloudstore.Query{}
+	it := bucket.Objects(ctx, query)
+	quickIndex := 0
+	for {
+		quickIndex++
+		next, err := it.Next()
+		if err == iterator.Done {
+			break
+		} else if err != nil {
+			log.Fatal(tre.New(err, "list failed"))
+		}
+		if quickIndex == index {
+			return next.Name
+		}
+	}
+	return ""
+}
+
 func commandList(storageService *cloudstore.Client, target profile, filter string) {
 	ctx := context.Background()
 	bucket := storageService.Bucket(target.Bucket)
@@ -21,8 +42,10 @@ func commandList(storageService *cloudstore.Client, target profile, filter strin
 	it := bucket.Objects(ctx, query)
 	data := [][]string{}
 	filteredCount := 0
+	quickIndex := 0
 
 	for {
+		quickIndex++
 		next, err := it.Next()
 		if err == iterator.Done {
 			break
@@ -35,7 +58,7 @@ func commandList(storageService *cloudstore.Client, target profile, filter strin
 				continue
 			}
 		}
-		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, next.Name), next.Created.Format(time.RFC822), next.Owner})
+		data = append(data, []string{fmt.Sprintf("kiya %s %d", target.Label, quickIndex), next.Name, next.Created.Format(time.RFC822), next.Owner})
 	}
 
 	if len(filter) > 0 {
@@ -44,7 +67,8 @@ func commandList(storageService *cloudstore.Client, target profile, filter strin
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
-	table.SetHeader([]string{"Copy to clipboard command", "Created", "Creator"})
+	table.SetHeader([]string{"To Clipboard", "Key", "Created", "Creator"})
+	table.SetAutoFormatHeaders(false)
 	table.AppendBulk(data)
 	table.Render() // writes to stdout
 }
