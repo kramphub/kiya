@@ -19,6 +19,9 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 		"base64": func(value string) string {
 			return base64.StdEncoding.EncodeToString([]byte(value))
 		},
+		"env": func(value string) string {
+			return os.Getenv(value)
+		},
 	}
 	processor := template.New("base").Funcs(funcMap)
 	templateName := "base"
