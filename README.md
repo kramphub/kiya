@@ -77,7 +77,7 @@ Specifying a filter argument will hide any keys that don't contain the filter st
 
     kiya teamF1 template template-file
 
-Output will be written to stdout unless `-o` is given.
+Output will be written to stdout.
 
 Example contents of `template-file`:
 
