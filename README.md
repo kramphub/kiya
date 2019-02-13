@@ -77,23 +77,27 @@ Specifying a filter argument will hide any keys that don't contain the filter st
 
     kiya teamF1 template template-file
 
-Output will be written to stdout.
+Output will be written to stdout unless `-o` is given.
 
 Example contents of `template-file`:
 
     bitbucket-password={{kiya "key-to-bitbucket-password"}}
     
-Kiya also provides a builtin function for base64 encoding.
+Kiya also provides a builtin function for base64 encoding:
 
     artifatory-hashed-password={{base64 (kiya "key-to-artifatory-password")}}
 
+For accessing OS environment values:
+
+    gcp-project={{env "PROJECT"}}
+
 ### Write a secret to clipboard, _copy_
 
-	kiya teamF1 copy concourse/cd-pipeline
+    kiya teamF1 copy concourse/cd-pipeline
 
 ### Create secret from clipboard, _paste_
 
-	kiya teamF1 paste google/accounts/someone@gmail.com
+    kiya teamF1 paste google/accounts/someone@gmail.com
 
 ### Move a secret from one profile to another, _move_
 
