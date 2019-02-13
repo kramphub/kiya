@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/atotto/clipboard"
 
@@ -17,7 +18,7 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-var version = "v1.4.3"
+var version = "build-" + time.Now().String()
 
 const (
 	doPrompt    = true
