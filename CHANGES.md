@@ -1,3 +1,9 @@
+# Changes
+
+### v1.5.0
+
+- add "env" function for template command that reads OS environment values.
+
 ### v1.4.3
 
 - fixes exit (1) on error (thanks to Frank Schroder)
