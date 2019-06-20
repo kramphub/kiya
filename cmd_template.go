@@ -30,7 +30,8 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	if len(filename) > 0 {
 		t, err := processor.ParseFiles(filename)
 		if err != nil {
-			log.Fatal(tre.New(err, "templating failed", "filename", filename))
+			wd, _ := os.Getwd()
+			log.Fatal(tre.New(err, "templating failed", "filename", filename, "current workdirectory", wd))
 		}
 		processor = t
 		templateName = filepath.Base(filename)
