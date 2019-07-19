@@ -1,4 +1,4 @@
-package main
+package kiya
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"golang.org/x/net/context"
 )
 
-func storeSecret(storageService *cloudstore.Client, target profile, key, encryptedValue string) error {
+func storeSecret(storageService *cloudstore.Client, target Profile, key, encryptedValue string) error {
 	bucket := storageService.Bucket(target.Bucket)
 	if _, err := bucket.Attrs(context.Background()); err != nil {
 		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
@@ -20,7 +20,7 @@ func storeSecret(storageService *cloudstore.Client, target profile, key, encrypt
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 
-func deleteSecret(storageService *cloudstore.Client, target profile, key string) error {
+func deleteSecret(storageService *cloudstore.Client, target Profile, key string) error {
 	bucket := storageService.Bucket(target.Bucket)
 	if _, err := bucket.Attrs(context.Background()); err != nil {
 		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
@@ -31,7 +31,7 @@ func deleteSecret(storageService *cloudstore.Client, target profile, key string)
 	return nil
 }
 
-func loadSecret(storageService *cloudstore.Client, target profile, key string) (string, error) {
+func loadSecret(storageService *cloudstore.Client, target Profile, key string) (string, error) {
 	bucket := storageService.Bucket(target.Bucket)
 	r, err := bucket.Object(key).NewReader(context.Background())
 	if err != nil {

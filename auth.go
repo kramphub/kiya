@@ -1,4 +1,4 @@
-package main
+package kiya
 
 import (
 	"io/ioutil"
@@ -11,9 +11,10 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func newAuthenticatedClient() *http.Client {
+// NewAuthenticatedClient ...
+func NewAuthenticatedClient(authLocation string) *http.Client {
 	var client *http.Client
-	if len(*oAuthLocation) > 0 {
+	if len(authLocation) > 0 {
 		// Your credentials should be obtained from the Google
 		// Developer Console (https://console.developers.google.com).
 		// Navigate to your project, then see the "Credentials" page
@@ -21,7 +22,7 @@ func newAuthenticatedClient() *http.Client {
 		// To create a service account client, click "Create new Client ID",
 		// select "Service Account", and click "Create Client ID". A JSON
 		// key file will then be downloaded to your computer.
-		data, err := ioutil.ReadFile(*oAuthLocation)
+		data, err := ioutil.ReadFile(authLocation)
 		if err != nil {
 			log.Fatal("unable to read JSON key file", err)
 		}

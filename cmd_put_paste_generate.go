@@ -1,4 +1,4 @@
-package main
+package kiya
 
 import (
 	"fmt"
@@ -9,12 +9,13 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
-	target profile, command, key, value string, mustPrompt bool) {
+// CommandPutPasteGenerate ...
+func CommandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
+	target Profile, command, key, value string, mustPrompt bool) {
 	// check for exists
 	_, err := loadSecret(storageService, target, key)
 	if err == nil {
-		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
+		if mustPrompt && !PromptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
 			log.Fatalln(command + " aborted")
 			return
 		}
