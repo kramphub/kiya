@@ -1,4 +1,4 @@
-package main
+package kiya
 
 import (
 	"encoding/json"
@@ -43,7 +43,8 @@ func configLocation() string {
 	return location
 }
 
-func loadConfiguration() {
+// LoadConfiguration loads the .kiya file
+func LoadConfiguration() {
 	profs, err := load()
 	if err != nil {
 		log.Fatal("unable to read/parse kiya configration file ("+configLocation()+")", err)

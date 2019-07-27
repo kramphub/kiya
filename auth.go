@@ -1,4 +1,4 @@
-package main
+package kiya
 
 import (
 	"io/ioutil"
@@ -11,7 +11,8 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func newAuthenticatedClient() *http.Client {
+// NewAuthenticatedClient creates an authenticated google client
+func NewAuthenticatedClient() *http.Client {
 	var client *http.Client
 	if len(*oAuthLocation) > 0 {
 		// Your credentials should be obtained from the Google
