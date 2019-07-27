@@ -14,7 +14,8 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-func commandList(storageService *cloudstore.Client, target profile, filter string) {
+// CommandList lists keys in a specific profile
+func CommandList(storageService *cloudstore.Client, target Profile, filter string) {
 	ctx := context.Background()
 	bucket := storageService.Bucket(target.Bucket)
 	query := &cloudstore.Query{}

@@ -7,9 +7,11 @@ import (
 	"path"
 )
 
-var profiles map[string]profile
+// Profiles is a collection of profiles as described in the .kiya configuration
+var Profiles map[string]Profile
 
-type profile struct {
+// Profile describes a single profile in a .kiya configuration
+type Profile struct {
 	Label       string
 	ProjectID   string
 	Location    string
@@ -19,8 +21,8 @@ type profile struct {
 	SecretRunes []rune
 }
 
-func load() (profs map[string]profile, err error) {
-	reader, err := os.Open(configLocation())
+func load(configFile string) (profs map[string]Profile, err error) {
+	reader, err := os.Open(configLocation(configFile))
 	defer reader.Close()
 	if err != nil {
 		return
@@ -35,8 +37,8 @@ func load() (profs map[string]profile, err error) {
 	return
 }
 
-func configLocation() string {
-	location := *oConfigFilename
+func configLocation(configFile string) string {
+	location := configFile
 	if len(location) == 0 {
 		location = path.Join(os.Getenv("HOME"), ".kiya")
 	}
@@ -44,10 +46,10 @@ func configLocation() string {
 }
 
 // LoadConfiguration loads the .kiya file
-func LoadConfiguration() {
-	profs, err := load()
+func LoadConfiguration(configFile string) {
+	profs, err := load(configFile)
 	if err != nil {
-		log.Fatal("unable to read/parse kiya configration file ("+configLocation()+")", err)
+		log.Fatal("unable to read/parse kiya configration file ("+configLocation(configFile)+")", err)
 	}
-	profiles = profs
+	Profiles = profs
 }
