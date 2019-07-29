@@ -1,12 +1,7 @@
 package kiya
 
 import (
-	"bufio"
-	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
-	"strings"
 
 	"crypto/rand"
 	"math/big"
@@ -18,41 +13,18 @@ import (
 
 // GetValueByKey is very self explanatory :P
 func GetValueByKey(kmsService *cloudkms.Service, storageService *cloudstore.Client, key string, target Profile) (string, error) {
-	encryptedValue, err := loadSecret(storageService, target, key)
+	encryptedValue, err := LoadSecret(storageService, target, key)
 	if err != nil {
 		log.Fatal(tre.New(err, "get failed", "key", key))
 		return "", err
 	}
-	decryptedValue, err := getDecryptedValue(kmsService, target, encryptedValue)
+	decryptedValue, err := GetDecryptedValue(kmsService, target, encryptedValue)
 	if err != nil {
 		log.Fatal(tre.New(err, "get failed", "cipherText", encryptedValue))
 		return "", err
 	}
 
 	return decryptedValue, nil
-}
-
-// ReadFromStdIn tries to read tries to read required input from standard in
-func ReadFromStdIn() string {
-	buffer, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		log.Fatal("Error while reading from standard in", err)
-	}
-
-	// remove newline added to std in from command execution
-	if buffer[len(buffer)-1] == '\n' {
-		buffer = buffer[:len(buffer)-1]
-	}
-
-	return string(buffer)
-}
-
-// PromptForYes prompts for a yes or no in a CMD environment
-func PromptForYes(message string) bool {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print(message)
-	yn, _ := reader.ReadString('\n')
-	return strings.HasPrefix(yn, "Y") || strings.HasPrefix(yn, "y")
 }
 
 // Generate_secret generates a random key

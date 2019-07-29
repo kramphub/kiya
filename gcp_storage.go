@@ -9,7 +9,8 @@ import (
 	"golang.org/x/net/context"
 )
 
-func storeSecret(storageService *cloudstore.Client, target Profile, key, encryptedValue string) error {
+// StoreSecret stores a new secret in a bucket
+func StoreSecret(storageService *cloudstore.Client, target Profile, key, encryptedValue string) error {
 	bucket := storageService.Bucket(target.Bucket)
 	if _, err := bucket.Attrs(context.Background()); err != nil {
 		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
@@ -20,7 +21,8 @@ func storeSecret(storageService *cloudstore.Client, target Profile, key, encrypt
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 
-func deleteSecret(storageService *cloudstore.Client, target Profile, key string) error {
+// DeleteSecret removes a key from the bucket
+func DeleteSecret(storageService *cloudstore.Client, target Profile, key string) error {
 	bucket := storageService.Bucket(target.Bucket)
 	if _, err := bucket.Attrs(context.Background()); err != nil {
 		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
@@ -31,7 +33,8 @@ func deleteSecret(storageService *cloudstore.Client, target Profile, key string)
 	return nil
 }
 
-func loadSecret(storageService *cloudstore.Client, target Profile, key string) (string, error) {
+// LoadSecret gets a secret from the bucket
+func LoadSecret(storageService *cloudstore.Client, target Profile, key string) (string, error) {
 	bucket := storageService.Bucket(target.Bucket)
 	r, err := bucket.Object(key).NewReader(context.Background())
 	if err != nil {

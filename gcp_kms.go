@@ -8,7 +8,8 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-func getDecryptedValue(kmsService *cloudkms.Service, target Profile, cipherText string) (string, error) {
+// GetDecryptedValue decrypts an encrypted value via Google KMS
+func GetDecryptedValue(kmsService *cloudkms.Service, target Profile, cipherText string) (string, error) {
 	decryptReq := &cloudkms.DecryptRequest{
 		Ciphertext: cipherText,
 	}
@@ -28,7 +29,8 @@ func getDecryptedValue(kmsService *cloudkms.Service, target Profile, cipherText 
 	return string(data), nil
 }
 
-func getEncryptedValue(kmsService *cloudkms.Service, target Profile, plainText string) (string, error) {
+// GetEncryptedValue converts a plain text to a Google KMS encrypted text
+func GetEncryptedValue(kmsService *cloudkms.Service, target Profile, plainText string) (string, error) {
 	encryptReq := &cloudkms.EncryptRequest{
 		Plaintext: base64.RawURLEncoding.EncodeToString([]byte(plainText)),
 	}
