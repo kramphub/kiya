@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-DIR="$(cd "$(dirname "${0}")/../.." && pwd)"
+DIR="$(cd "$(dirname "${0}")/../../cmd/kiya" && pwd)"
 cd "${DIR}"
 
 goos() {
@@ -20,7 +20,7 @@ goarch() {
   esac
 }
 
-BASE_DIR="release"
+BASE_DIR="../../release"
 rm -rf "${BASE_DIR}"
 
 SRCS=$(find . -type f -name "*.go" -maxdepth 1|grep -v "test")
