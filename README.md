@@ -52,7 +52,10 @@ Create a file name `.kiya` in your home directory with the content for a shareab
 In this example, `teamF1` refers to the profile in your configuration. `concourse` refers to the site or domain. `cd-pipeline` is the username which can be an email address too. `mySecretPassword` is the plain text password.
 
 If a password was already stored then you will be warned about overwriting it.
+The -quiet flag can be used to skip the confirmation prompt:
 
+	kiya -quiet teamF1 put concourse/cd-pipeline myNewSecretPassword
+	
 _Note: this will put a secret in your command history; better use paste, see below._
 
 ### Generate a password, _generate_
