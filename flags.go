@@ -10,4 +10,5 @@ var (
 	oVersion        = flag.Bool("version", false, "show the version of the tool")
 	oOutputFilename = flag.String("o", "", "if not empty then write the secret to a file else write to stdout (get)")
 	oCreatedAt      = flag.String("ca", "", "if not empty then use this formatted timestamp (RFC3339) as the creation date of the new secret")
+	oQuiet          = flag.Bool("quiet", false, "don't prompt for confirmation on destructive actions")
 )
