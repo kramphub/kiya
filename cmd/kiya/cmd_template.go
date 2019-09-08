@@ -14,8 +14,7 @@ import (
 	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
-// commandTemplate ...
-func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, outputFile string) {
+func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, outputFilename string) {
 	funcMap := template.FuncMap{
 		"kiya": templateFunction(kmsService, storageService, target),
 		"base64": func(value string) string {
@@ -32,7 +31,8 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	if len(filename) > 0 {
 		t, err := processor.ParseFiles(filename)
 		if err != nil {
-			log.Fatal(tre.New(err, "templating failed", "filename", filename))
+			wd, _ := os.Getwd()
+			log.Fatal(tre.New(err, "templating failed", "filename", filename, "current workdirectory", wd))
 		}
 		processor = t
 		templateName = filepath.Base(filename)
@@ -46,8 +46,8 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	}
 	writer := os.Stdout
 	// change writer is output was specified
-	if len(outputFile) > 0 {
-		out, err := os.Create(outputFile)
+	if len(outputFilename) > 0 {
+		out, err := os.Create(outputFilename)
 		if err != nil {
 			log.Fatal("unable to create output", err)
 		}

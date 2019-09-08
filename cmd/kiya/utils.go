@@ -25,6 +25,12 @@ func readFromStdIn() string {
 
 // PromptForYes prompts for a yes or no in a CMD environment
 func promptForYes(message string) bool {
+
+	// Don't prompt for confirmation if the quiet flag is enabled
+	if *oQuiet {
+		return true
+	}
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print(message)
 	yn, _ := reader.ReadString('\n')
