@@ -1,4 +1,4 @@
-module github.com/jroosing/kiya
+module github.com/emicklei/kiya
 
 go 1.12
 
