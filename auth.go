@@ -33,7 +33,7 @@ func NewAuthenticatedClient(authLocation string) *http.Client {
 		// Initiate an http.Client. The following GET request will be
 		// authorized and authenticated on the behalf of
 		// your service account.
-		client = conf.Client(oauth2.NoContext)
+		client = conf.Client(context.Background())
 	} else {
 		// Authorize the client using Aplication Default Credentials.
 		// See https://g.co/dv/identity/protocols/application-default-credentials
