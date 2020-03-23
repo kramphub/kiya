@@ -6,8 +6,9 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"github.com/jroosing/kiya"
 	"google.golang.org/api/cloudkms/v1"
+
+	"github.com/kramphub/kiya"
 )
 
 // commandPutPasteGenerate ...

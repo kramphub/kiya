@@ -6,8 +6,9 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"github.com/jroosing/kiya"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
+
+	"github.com/kramphub/kiya"
 )
 
 // commandMove transfers a secret from a source to a target profile.

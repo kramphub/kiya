@@ -9,10 +9,11 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"github.com/jroosing/kiya"
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
+
+	"github.com/kramphub/kiya"
 )
 
 // commandList lists keys in a specific profile

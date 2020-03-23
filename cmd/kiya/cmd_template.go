@@ -10,8 +10,9 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"github.com/jroosing/kiya"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
+
+	"github.com/kramphub/kiya"
 )
 
 func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, outputFilename string) {
