@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/emicklei/tre"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 // GetDecryptedValue decrypts an encrypted value via Google KMS

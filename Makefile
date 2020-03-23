@@ -3,7 +3,7 @@ releasegen:
 	docker run \
 		--volume "$(CURDIR):/go/src/github.com/kramphub/kiya" \
 		--workdir "/go/src/github.com/kramphub/kiya" \
-		golang:1.12.7 \
+		golang:1.13 \
 		bash -x etc/bin/releasegen.sh
 
 # go get github.com/aktau/github-release

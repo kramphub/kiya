@@ -7,23 +7,23 @@ cd "${DIR}"
 
 goos() {
   case "${1}" in
-    Darwin) echo darwin ;;
-    Linux) echo linux ;;
-    *) return 1 ;;
+  Darwin) echo darwin ;;
+  Linux) echo linux ;;
+  *) return 1 ;;
   esac
 }
 
 goarch() {
   case "${1}" in
-    x86_64) echo amd64 ;;
-    *) return 1 ;;
+  x86_64) echo amd64 ;;
+  *) return 1 ;;
   esac
 }
 
 BASE_DIR="../../release"
 rm -rf "${BASE_DIR}"
 
-SRCS=$(find . -type f -name "*.go" -maxdepth 1|grep -v "test")
+SRCS=$(find . -type f -name "*.go" -maxdepth 1 | grep -v "test")
 
 for os in Darwin Linux Windows; do
   for arch in x86_64; do
