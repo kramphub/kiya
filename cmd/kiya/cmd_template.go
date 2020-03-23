@@ -10,10 +10,12 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
+
+	"github.com/kramphub/kiya"
 )
 
-func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile) {
+func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, outputFilename string) {
 	funcMap := template.FuncMap{
 		"kiya": templateFunction(kmsService, storageService, target),
 		"base64": func(value string) string {
@@ -45,8 +47,8 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	}
 	writer := os.Stdout
 	// change writer is output was specified
-	if len(*oOutputFilename) > 0 {
-		out, err := os.Create(*oOutputFilename)
+	if len(outputFilename) > 0 {
+		out, err := os.Create(outputFilename)
 		if err != nil {
 			log.Fatal("unable to create output", err)
 		}
@@ -56,9 +58,9 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	processor.ExecuteTemplate(writer, templateName, "")
 }
 
-func templateFunction(kmsService *cloudkms.Service, storageService *cloudstore.Client, target profile) func(string) string {
+func templateFunction(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile) func(string) string {
 	return func(key string) string {
-		value, err := getValueByKey(kmsService, storageService, key, target)
+		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
 		if err != nil {
 			log.Fatal(tre.New(err, "templating failed", "key", key))
 			return ""

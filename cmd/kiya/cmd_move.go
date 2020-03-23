@@ -6,20 +6,22 @@ import (
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	cloudkms "google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/cloudkms/v1"
+
+	"github.com/kramphub/kiya"
 )
 
 // commandMove transfers a secret from a source to a target profile.
 func commandMove(
 	kmsService *cloudkms.Service,
 	storageService *cloudstore.Client,
-	source profile,
+	source kiya.Profile,
 	sourceKey string,
-	target profile,
+	target kiya.Profile,
 	targetKey string) {
 
 	// fetch value for key from source
-	sourceValue, err := getValueByKey(kmsService, storageService, sourceKey, source)
+	sourceValue, err := kiya.GetValueByKey(kmsService, storageService, sourceKey, source)
 	if err != nil {
 		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey))
 	}

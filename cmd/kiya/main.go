@@ -6,11 +6,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/atotto/clipboard"
 
-	"strconv"
+	"github.com/kramphub/kiya"
 
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
@@ -31,7 +32,7 @@ func main() {
 		fmt.Println("kiya version", version)
 		os.Exit(0)
 	}
-	loadConfiguration()
+	kiya.LoadConfiguration(*oConfigFilename)
 	if len(flag.Args()) < 2 {
 		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
@@ -39,7 +40,7 @@ func main() {
 		os.Exit(0)
 	}
 	// Create the KMS client.
-	kmsService, err := cloudkms.New(newAuthenticatedClient())
+	kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +50,7 @@ func main() {
 		log.Fatalf("failed to create client [%v]", err)
 	}
 	profileName := flag.Arg(0)
-	target, ok := profiles[profileName]
+	target, ok := kiya.Profiles[profileName]
 	if !ok {
 		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
@@ -93,7 +94,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		secret, err := GenerateSecret(secretLength, target.SecretRunes)
+		secret, err := kiya.GenerateSecret(secretLength, target.SecretRunes)
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
@@ -103,7 +104,7 @@ func main() {
 
 	case "copy":
 		key := flag.Arg(2)
-		value, err := getValueByKey(kmsService, storageService, key, target)
+		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
@@ -113,7 +114,7 @@ func main() {
 
 	case "get":
 		key := flag.Arg(2)
-		value, err := getValueByKey(kmsService, storageService, key, target)
+		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
@@ -133,12 +134,12 @@ func main() {
 		filter := flag.Arg(2)
 		commandList(storageService, target, filter)
 	case "template":
-		commandTemplate(kmsService, storageService, target)
+		commandTemplate(kmsService, storageService, target, *oOutputFilename)
 	case "move":
 		// kiya [source] move [source-key] [target] [|target-key]
-		sourceProfile := profiles[flag.Arg(0)]
+		sourceProfile := kiya.Profiles[flag.Arg(0)]
 		sourceKey := flag.Arg(2)
-		targetProfile := profiles[flag.Arg(3)]
+		targetProfile := kiya.Profiles[flag.Arg(3)]
 		targetKey := sourceKey
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)

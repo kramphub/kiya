@@ -12,9 +12,12 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"golang.org/x/net/context"
 	"google.golang.org/api/iterator"
+
+	"github.com/kramphub/kiya"
 )
 
-func commandList(storageService *cloudstore.Client, target profile, filter string) {
+// commandList lists keys in a specific profile
+func commandList(storageService *cloudstore.Client, target kiya.Profile, filter string) {
 	ctx := context.Background()
 	bucket := storageService.Bucket(target.Bucket)
 	query := &cloudstore.Query{}
