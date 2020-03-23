@@ -1,5 +1,9 @@
 # Changes
 
+### v1.6.0
+
+- refactored kiya so that it can be used as a library
+
 ### v1.5.0
 
 - add "env" function for template command that reads OS environment values.
