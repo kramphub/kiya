@@ -13,10 +13,10 @@ import (
 
 	"github.com/kramphub/kiya"
 
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
 	"golang.org/x/net/context"
-	"google.golang.org/api/cloudkms/v1"
 )
 
 var version = "build-" + time.Now().String()
@@ -40,7 +40,7 @@ func main() {
 		os.Exit(0)
 	}
 	// Create the KMS client.
-	kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
+	kmsService, err := cloudkms.NewKeyManagementClient(context.Background(), kiya.GetAuthCredentials(*oAuthLocation))
 	if err != nil {
 		log.Fatal(err)
 	}

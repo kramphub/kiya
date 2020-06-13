@@ -4,16 +4,16 @@ import (
 	"fmt"
 	"log"
 
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"google.golang.org/api/cloudkms/v1"
 
 	"github.com/kramphub/kiya"
 )
 
 // commandMove transfers a secret from a source to a target profile.
 func commandMove(
-	kmsService *cloudkms.Service,
+	kmsService *cloudkms.KeyManagementClient,
 	storageService *cloudstore.Client,
 	source kiya.Profile,
 	sourceKey string,

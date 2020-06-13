@@ -8,14 +8,14 @@ import (
 	"path/filepath"
 	"text/template"
 
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"google.golang.org/api/cloudkms/v1"
 
 	"github.com/kramphub/kiya"
 )
 
-func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, outputFilename string) {
+func commandTemplate(kmsService *cloudkms.KeyManagementClient, storageService *cloudstore.Client, target kiya.Profile, outputFilename string) {
 	funcMap := template.FuncMap{
 		"kiya": templateFunction(kmsService, storageService, target),
 		"base64": func(value string) string {
@@ -58,7 +58,7 @@ func commandTemplate(kmsService *cloudkms.Service, storageService *cloudstore.Cl
 	processor.ExecuteTemplate(writer, templateName, "")
 }
 
-func templateFunction(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile) func(string) string {
+func templateFunction(kmsService *cloudkms.KeyManagementClient, storageService *cloudstore.Client, target kiya.Profile) func(string) string {
 	return func(key string) string {
 		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
 		if err != nil {

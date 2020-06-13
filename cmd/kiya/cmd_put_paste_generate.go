@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"log"
 
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"google.golang.org/api/cloudkms/v1"
 
 	"github.com/kramphub/kiya"
 )
 
 // commandPutPasteGenerate ...
-func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
+func commandPutPasteGenerate(kmsService *cloudkms.KeyManagementClient, storageService *cloudstore.Client,
 	target kiya.Profile, command, key, value string, mustPrompt bool) {
 	// check for exists
 	_, err := kiya.LoadSecret(storageService, target, key)

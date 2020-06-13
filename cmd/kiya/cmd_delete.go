@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"log"
 
+	cloudkms "cloud.google.com/go/kms/apiv1"
 	cloudstore "cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
-	"google.golang.org/api/cloudkms/v1"
 
 	"github.com/kramphub/kiya"
 )
 
 // commandDelete deletes a stored key
-func commandDelete(kmsService *cloudkms.Service, storageService *cloudstore.Client, target kiya.Profile, key string) {
+func commandDelete(kmsService *cloudkms.KeyManagementClient, storageService *cloudstore.Client, target kiya.Profile, key string) {
 	_, err := kiya.GetValueByKey(kmsService, storageService, key, target)
 	if err != nil {
 		log.Fatal(tre.New(err, "delete failed", "key", key, "err", err))
