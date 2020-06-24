@@ -21,18 +21,6 @@ func StoreSecret(storageService *cloudstore.Client, target Profile, key, encrypt
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 
-// DeleteSecret removes a key from the bucket
-func DeleteSecret(storageService *cloudstore.Client, target Profile, key string) error {
-	bucket := storageService.Bucket(target.Bucket)
-	if _, err := bucket.Attrs(context.Background()); err != nil {
-		tre.New(err, "bucket does not exist", "bucket", target.Bucket)
-	}
-	if err := bucket.Object(key).Delete(context.Background()); err != nil {
-		return tre.New(err, "failed to delete secret", "key", key)
-	}
-	return nil
-}
-
 // LoadSecret gets a secret from the bucket
 func LoadSecret(storageService *cloudstore.Client, target Profile, key string) (string, error) {
 	bucket := storageService.Bucket(target.Bucket)
