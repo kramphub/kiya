@@ -23,6 +23,7 @@ func commandMove(
 		if err := kiya.Move(kmsService, storageService, source, sourceKey, target, targetKey); err != nil {
 			log.Fatal(err)
 		}
+		fmt.Printf("Successfully copied [%s] to [%s]\n", sourceKey, target.Label)
 	} else {
 		log.Fatalln("delete aborted")
 	}

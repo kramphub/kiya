@@ -2,7 +2,6 @@ package kiya
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	cloudstore "cloud.google.com/go/storage"
@@ -56,9 +55,8 @@ func Move(kmsService *cloudkms.Service,
 	if err := PutSecret(kmsService, storageService, target, targetKey, sourceValue); err != nil {
 		return tre.New(err, "save key failed", targetKey)
 	}
-	fmt.Printf("Successfully copied [%s] to [%s]\n", sourceKey, target.Label)
 	// delete key from source
-	if err := DeleteSecret(kmsService, storageService, target, targetKey); err != nil {
+	if err := DeleteSecret(kmsService, storageService, source, sourceKey); err != nil {
 		return tre.New(err, "could not delete key", targetKey)
 	}
 	return nil
