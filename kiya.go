@@ -94,10 +94,8 @@ func DeleteSecret(kmsService *cloudkms.Service, storageService *cloudstore.Clien
 	if _, err := bucket.Attrs(context.Background()); err != nil {
 		return tre.New(err, "bucket does not exist", "bucket", target.Bucket)
 	}
-	if err := bucket.Object(key).Delete(context.Background()); err != nil {
-		return tre.New(err, "failed to delete secret", "key", key)
-	}
-	return nil
+	err = bucket.Object(key).Delete(context.Background())
+	return tre.New(err, "failed to delete secret", "key", key)
 }
 
 
