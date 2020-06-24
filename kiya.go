@@ -56,10 +56,8 @@ func Move(kmsService *cloudkms.Service,
 		return tre.New(err, "save key failed", targetKey)
 	}
 	// delete key from source
-	if err := DeleteSecret(kmsService, storageService, source, sourceKey); err != nil {
-		return tre.New(err, "could not delete key", targetKey)
-	}
-	return nil
+	err = DeleteSecret(kmsService, storageService, source, sourceKey)
+	return tre.New(err, "could not delete key", targetKey)
 }
 
 func CheckSecretExists(storageService *cloudstore.Client, target Profile, key string) bool {
@@ -79,12 +77,10 @@ func PutSecret(kmsService *cloudkms.Service,
 
 	encryptedValue, err := GetEncryptedValue(kmsService, target, value)
 	if err != nil {
-		return err
+		return tre.New(err, "failed to fetch encrypted value", "key", key)
 	}
-	if err := StoreSecret(storageService, target, key, encryptedValue); err != nil {
-		return tre.New(err, "store secret failed", "key", key, "encryptedValue", encryptedValue)
-	}
-	return nil
+	err = StoreSecret(storageService, target, key, encryptedValue)
+	return tre.New(err, "store secret failed", "key", key, "encryptedValue", encryptedValue)
 }
 
 // DeleteSecret removes a key from the bucket

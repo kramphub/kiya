@@ -18,10 +18,7 @@ func StoreSecret(storageService *cloudstore.Client, target Profile, key, encrypt
 	w := bucket.Object(key).NewWriter(context.Background())
 	defer w.Close()
 	_, err := fmt.Fprintf(w, encryptedValue)
-	if err != nil {
-		return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
-	}
-	return nil
+	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 
 // LoadSecret gets a secret from the bucket
