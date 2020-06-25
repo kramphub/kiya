@@ -5,7 +5,6 @@ import (
 	"log"
 
 	cloudstore "cloud.google.com/go/storage"
-	"github.com/emicklei/tre"
 	"google.golang.org/api/cloudkms/v1"
 
 	"github.com/kramphub/kiya"
@@ -20,14 +19,12 @@ func commandMove(
 	target kiya.Profile,
 	targetKey string) {
 
-	// fetch value for key from source
-	sourceValue, err := kiya.GetValueByKey(kmsService, storageService, sourceKey, source)
-	if err != nil {
-		log.Fatal(tre.New(err, "get source key failed", "key", sourceKey))
+	if promptForYes(fmt.Sprintf("Are you sure you want to move [%s] from [%s] (y/N)", sourceKey, target.Label)) {
+		if err := kiya.Move(kmsService, storageService, source, sourceKey, target, targetKey); err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Successfully moved [%s] to [%s]\n", sourceKey, target.Label)
+	} else {
+		log.Fatalln("delete aborted")
 	}
-	// store value for key to target
-	commandPutPasteGenerate(kmsService, storageService, target, "put", targetKey, sourceValue, true)
-	fmt.Printf("Successfully copied [%s] to [%s]\n", sourceKey, target.Label)
-	// delete key from source
-	commandDelete(kmsService, storageService, source, sourceKey)
 }

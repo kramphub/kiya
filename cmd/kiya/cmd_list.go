@@ -8,37 +8,29 @@ import (
 	"time"
 
 	cloudstore "cloud.google.com/go/storage"
-	"github.com/emicklei/tre"
 	"github.com/olekukonko/tablewriter"
-	"golang.org/x/net/context"
-	"google.golang.org/api/iterator"
 
 	"github.com/kramphub/kiya"
 )
 
 // commandList lists keys in a specific profile
 func commandList(storageService *cloudstore.Client, target kiya.Profile, filter string) {
-	ctx := context.Background()
-	bucket := storageService.Bucket(target.Bucket)
-	query := &cloudstore.Query{}
-	it := bucket.Objects(ctx, query)
-	data := [][]string{}
+	keys, err := kiya.List(storageService, target)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var data [][]string
 	filteredCount := 0
 
-	for {
-		next, err := it.Next()
-		if err == iterator.Done {
-			break
-		} else if err != nil {
-			log.Fatal(tre.New(err, "list failed"))
-		}
+	for _, k := range keys {
 		if len(filter) > 0 {
-			if !caseInsensitiveContains(next.Name, filter) {
+			if !caseInsensitiveContains(k.Name, filter) {
 				filteredCount++
 				continue
 			}
 		}
-		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, next.Name), next.Created.Format(time.RFC822), next.Owner})
+		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, k.Name), k.CreatedAt.Format(time.RFC822), k.Owner})
 	}
 
 	if len(filter) > 0 {
