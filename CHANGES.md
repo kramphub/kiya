@@ -1,5 +1,13 @@
 # Changes
 
+### v1.8.1
+
+- fallback to list command if argument is not a known command.
+
+## v1.8.0
+
+- add list command
+
 ### v1.6.0
 
 - refactored kiya so that it can be used as a library
