@@ -146,6 +146,6 @@ func main() {
 		}
 		commandMove(kmsService, storageService, sourceProfile, sourceKey, targetProfile, targetKey)
 	default:
-		fmt.Println("unknown command", flag.Arg(1))
+		commandList(storageService, target, flag.Arg(1))
 	}
 }

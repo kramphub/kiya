@@ -76,6 +76,8 @@ _Note: this will put a secret in your command history; better use copy, see belo
 
 Specifying a filter argument will hide any keys that don't contain the filter string.
 
+The list command is also used when the command is unknown, e.g. `kiya teamF1 list redbull` shows the same results as `kiya teamF1 redbull`.
+
 ### Fill a template, _template_
 
     kiya teamF1 template template-file
