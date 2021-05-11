@@ -26,7 +26,11 @@ The bucket stores the encrypted secret value using the label as the storage key.
 
 	gcloud auth application-default login
 			
-	
+
+## Install
+
+	go install github.com/kramphub/kiya/cmd/kiya@latest
+
 ## Usage
 
 Read `setup.md` for detailed instructions how to create a bucket, a keyring, an cryption key and set the permissions.
