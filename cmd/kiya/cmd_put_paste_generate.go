@@ -1,26 +1,30 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	cloudstore "cloud.google.com/go/storage"
-	"google.golang.org/api/cloudkms/v1"
-
-	"github.com/kramphub/kiya"
+	"github.com/kramphub/kiya/backend"
 )
 
 // commandPutPasteGenerate ...
-func commandPutPasteGenerate(kmsService *cloudkms.Service, storageService *cloudstore.Client,
-	target kiya.Profile, command, key, value string, mustPrompt bool) {
+func commandPutPasteGenerate(
+	ctx context.Context,
+	b backend.Backend,
+	target *backend.Profile,
+	command, key, value string,
+	mustPrompt bool,
+) {
 
-	if kiya.CheckSecretExists(storageService, target, key) {
+	if exists, _ := b.CheckExists(ctx, target, key); exists {
 		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
 			log.Fatalln(command + " aborted")
 			return
 		}
 	}
-	if err := kiya.PutSecret(kmsService, storageService, target, key, value); err != nil {
+
+	if err := b.Put(ctx, target, key, value); err != nil {
 		log.Fatal(err)
 	}
 }

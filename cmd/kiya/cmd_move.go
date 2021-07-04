@@ -1,26 +1,26 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
-	cloudstore "cloud.google.com/go/storage"
-	"google.golang.org/api/cloudkms/v1"
-
 	"github.com/kramphub/kiya"
+	"github.com/kramphub/kiya/backend"
 )
 
 // commandMove transfers a secret from a source to a target profile.
 func commandMove(
-	kmsService *cloudkms.Service,
-	storageService *cloudstore.Client,
-	source kiya.Profile,
+	ctx context.Context,
+	b backend.Backend,
+	source *backend.Profile,
 	sourceKey string,
-	target kiya.Profile,
-	targetKey string) {
+	target *backend.Profile,
+	targetKey string,
+) {
 
 	if promptForYes(fmt.Sprintf("Are you sure you want to move [%s] from [%s] (y/N)", sourceKey, target.Label)) {
-		if err := kiya.Move(kmsService, storageService, source, sourceKey, target, targetKey); err != nil {
+		if err := kiya.Move(ctx, b, source, sourceKey, target, targetKey); err != nil {
 			log.Fatal(err)
 		}
 		fmt.Printf("Successfully moved [%s] to [%s]\n", sourceKey, target.Label)

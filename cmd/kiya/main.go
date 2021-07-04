@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/atotto/clipboard"
-
-	"github.com/kramphub/kiya"
-
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	cloudstore "cloud.google.com/go/storage"
+	"github.com/atotto/clipboard"
 	"github.com/emicklei/tre"
+	"github.com/kramphub/kiya"
+	"github.com/kramphub/kiya/backend"
 	"golang.org/x/net/context"
 	"google.golang.org/api/cloudkms/v1"
 )
@@ -27,6 +27,8 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+
 	flag.Parse()
 	if *oVersion {
 		fmt.Println("kiya version", version)
@@ -39,16 +41,7 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
-	// Create the KMS client.
-	kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
-	if err != nil {
-		log.Fatal(err)
-	}
-	// Create the Bucket client
-	storageService, err := cloudstore.NewClient(context.Background())
-	if err != nil {
-		log.Fatalf("failed to create client [%v]", err)
-	}
+
 	profileName := flag.Arg(0)
 	target, ok := kiya.Profiles[profileName]
 	if !ok {
@@ -92,10 +85,10 @@ func main() {
 		key := flag.Arg(2)
 		value := flag.Arg(3)
 		if len(value) != 0 {
-			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doPrompt)
+			commandPutPasteGenerate(ctx, b, &target, "put", key, value, doPrompt)
 		} else {
 			value = readFromStdIn()
-			commandPutPasteGenerate(kmsService, storageService, target, "put", key, value, doNotPrompt)
+			commandPutPasteGenerate(ctx, b, &target, "put", key, value, doNotPrompt)
 		}
 
 	case "paste":
@@ -105,7 +98,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "paste", key, value, doPrompt)
+		commandPutPasteGenerate(ctx, b, &target, "paste", key, value, doPrompt)
 
 	case "generate":
 		key := flag.Arg(2)
@@ -129,43 +122,46 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		commandPutPasteGenerate(kmsService, storageService, target, "generate", key, secret, mustPrompt)
+		commandPutPasteGenerate(ctx, b, &target, "generate", key, secret, mustPrompt)
 		// make it available on the clipboard, ignore error
 		clipboard.WriteAll(secret)
 
 	case "copy":
 		key := flag.Arg(2)
-		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
+		value, err := b.Get(ctx, &target, key, "latest")
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
-		if err := clipboard.WriteAll(value); err != nil {
+		if err := clipboard.WriteAll(string(value)); err != nil {
 			log.Fatal(tre.New(err, "copy failed", "key", key, "err", err))
 		}
 
 	case "get":
 		key := flag.Arg(2)
-		value, err := kiya.GetValueByKey(kmsService, storageService, key, target)
+
+		bytes, err := b.Get(ctx, &target, key, "latest")
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
+
 		if len(*oOutputFilename) > 0 {
-			if err := ioutil.WriteFile(*oOutputFilename, []byte(value), os.ModePerm); err != nil {
+			if err := ioutil.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
 				log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 			}
 			return
 		}
-		fmt.Println(value)
+
+		fmt.Println(string(bytes))
 
 	case "delete":
 		key := flag.Arg(2)
-		commandDelete(kmsService, storageService, target, key)
+		commandDelete(ctx, b, &target, key)
 	case "list":
 		// kiya [profile] list [|filter-term]
 		filter := flag.Arg(2)
-		commandList(storageService, target, filter)
+		commandList(ctx, b, &target, filter)
 	case "template":
-		commandTemplate(kmsService, storageService, target, *oOutputFilename)
+		commandTemplate(ctx, b, &target, *oOutputFilename)
 	case "move":
 		// kiya [source] move [source-key] [target] [|target-key]
 		sourceProfile := kiya.Profiles[flag.Arg(0)]
@@ -175,8 +171,8 @@ func main() {
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)
 		}
-		commandMove(kmsService, storageService, sourceProfile, sourceKey, targetProfile, targetKey)
+		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
 	default:
-		commandList(storageService, target, flag.Arg(1))
+		commandList(ctx, b, &target, flag.Arg(1))
 	}
 }
