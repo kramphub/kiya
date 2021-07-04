@@ -54,6 +54,37 @@ func main() {
 	if !ok {
 		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
+
+	var b backend.Backend
+	switch target.Backend {
+	case "gsm":
+		// Create GSM client
+		gsmClient, err := secretmanager.NewClient(ctx)
+		if err != nil {
+			log.Fatalf("failed to setup client: %v", err)
+		}
+		defer gsmClient.Close()
+
+		b = backend.NewGSM(gsmClient)
+
+	case "kms":
+		fallthrough
+	default:
+		// Create the KMS client
+		kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Create the Bucket client
+		storageService, err := cloudstore.NewClient(context.Background())
+		if err != nil {
+			log.Fatalf("failed to create client [%v]", err)
+		}
+
+		b = backend.NewKMS(kmsService, storageService)
+	}
+
 	// what command?
 	switch flag.Arg(1) {
 
