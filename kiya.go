@@ -10,12 +10,6 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-type Key struct {
-	Name string
-	CreatedAt time.Time
-	Owner string
-}
-
 func List(storageService *cloudstore.Client, target Profile) ([]Key, error) {
 	ctx := context.Background()
 	bucket := storageService.Bucket(target.Bucket)
