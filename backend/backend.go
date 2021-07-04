@@ -12,3 +12,15 @@ type Backend interface {
 	Put(ctx context.Context, p *Profile, key, value string) error
 	Delete(ctx context.Context, p *Profile, key string) error
 }
+
+// Profile describes a single profile in a .kiya configuration
+type Profile struct {
+	Backend     string
+	Label       string
+	ProjectID   string
+	Location    string
+	Keyring     string
+	CryptoKey   string
+	Bucket      string
+	SecretRunes []rune
+}
