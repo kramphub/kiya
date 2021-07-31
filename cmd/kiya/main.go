@@ -108,7 +108,7 @@ func main() {
 
 	case "copy":
 		key := flag.Arg(2)
-		value, err := b.Get(ctx, &target, key, "latest")
+		value, err := b.Get(ctx, &target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
@@ -119,7 +119,7 @@ func main() {
 	case "get":
 		key := flag.Arg(2)
 
-		bytes, err := b.Get(ctx, &target, key, "latest")
+		bytes, err := b.Get(ctx, &target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
