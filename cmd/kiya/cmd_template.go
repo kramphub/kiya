@@ -58,7 +58,7 @@ func commandTemplate(ctx context.Context, b backend.Backend, target *backend.Pro
 
 func templateFunction(ctx context.Context, b backend.Backend, target *backend.Profile) func(string) string {
 	return func(key string) string {
-		value, err := b.Get(ctx, target, key, "latest")
+		value, err := b.Get(ctx, target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "templating failed", "key", key))
 			return ""
