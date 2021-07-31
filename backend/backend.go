@@ -13,6 +13,11 @@ type Backend interface {
 	Delete(ctx context.Context, p *Profile, key string) error
 	Close() error
 }
+
+type Key struct {
+	Name      string
+	CreatedAt time.Time
+	Owner     string
 }
 
 // Profile describes a single profile in a .kiya configuration
