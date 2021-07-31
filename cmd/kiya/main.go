@@ -48,35 +48,15 @@ func main() {
 		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
 
-	var b backend.Backend
-	switch target.Backend {
-	case "gsm":
-		// Create GSM client
-		gsmClient, err := secretmanager.NewClient(ctx)
-		if err != nil {
-			log.Fatalf("failed to setup client: %v", err)
-		}
-		defer gsmClient.Close()
-
-		b = backend.NewGSM(gsmClient)
-
-	case "kms":
-		fallthrough
-	default:
-		// Create the KMS client
-		kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		// Create the Bucket client
-		storageService, err := cloudstore.NewClient(context.Background())
-		if err != nil {
-			log.Fatalf("failed to create client [%v]", err)
-		}
-
-		b = backend.NewKMS(kmsService, storageService)
+	b, err := getBackend(ctx, &target)
+	if err != nil {
+		log.Fatalf("failed to intialize the secret provider backend, %s", err.Error())
 	}
+	defer func() {
+		if err := b.Close(); err != nil {
+			log.Fatalf("failed to close the secret provider backend, %s", err.Error())
+		}
+	}()
 
 	// what command?
 	switch flag.Arg(1) {
@@ -174,5 +154,35 @@ func main() {
 		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
 	default:
 		commandList(ctx, b, &target, flag.Arg(1))
+	}
+}
+
+func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
+	switch p.Backend {
+	case "gsm":
+		// Create GSM client
+		gsmClient, err := secretmanager.NewClient(ctx)
+		if err != nil {
+			log.Fatalf("failed to setup client: %v", err)
+		}
+
+		return backend.NewGSM(gsmClient), nil
+
+	case "kms":
+		fallthrough
+	default:
+		// Create the KMS client
+		kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// Create the Bucket client
+		storageService, err := cloudstore.NewClient(ctx)
+		if err != nil {
+			log.Fatalf("failed to create client [%v]", err)
+		}
+
+		return backend.NewKMS(kmsService, storageService), nil
 	}
 }
