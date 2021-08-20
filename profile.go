@@ -5,23 +5,14 @@ import (
 	"log"
 	"os"
 	"path"
+
+	"github.com/kramphub/kiya/backend"
 )
 
 // Profiles is a collection of profiles as described in the .kiya configuration
-var Profiles map[string]Profile
+var Profiles map[string]backend.Profile
 
-// Profile describes a single profile in a .kiya configuration
-type Profile struct {
-	Label       string
-	ProjectID   string
-	Location    string
-	Keyring     string
-	CryptoKey   string
-	Bucket      string
-	SecretRunes []rune
-}
-
-func load(configFile string) (profs map[string]Profile, err error) {
+func load(configFile string) (profs map[string]backend.Profile, err error) {
 	reader, err := os.Open(configLocation(configFile))
 	defer reader.Close()
 	if err != nil {

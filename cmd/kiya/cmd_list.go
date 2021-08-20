@@ -1,21 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 	"time"
 
-	cloudstore "cloud.google.com/go/storage"
+	"github.com/kramphub/kiya/backend"
 	"github.com/olekukonko/tablewriter"
-
-	"github.com/kramphub/kiya"
 )
 
 // commandList lists keys in a specific profile
-func commandList(storageService *cloudstore.Client, target kiya.Profile, filter string) {
-	keys, err := kiya.List(storageService, target)
+func commandList(ctx context.Context, b backend.Backend, target *backend.Profile, filter string) {
+	keys, err := b.List(ctx, target)
 	if err != nil {
 		log.Fatal(err)
 	}
