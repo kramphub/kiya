@@ -39,7 +39,7 @@ Read `setup.md` for detailed instructions how to setup the basic prerequisites.
 ### Configuration
 
 Create a file name `.kiya` in your home directory with the content for a shareable secrets profile. You can have
-multiple profiles for different usages. Each profile should mention a either `kms` or `gsm` to be used as the `backend`.
+multiple profiles for different usages. Each profile should either mention `kms` or `gsm` to be used as the `backend`.
 If no value is defined for a profile's `backend`, `kms` will be used as a default.
 
 ```json
