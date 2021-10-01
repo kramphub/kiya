@@ -2,30 +2,31 @@
 
 <img align="right" src="kea.jpg">
 
-Kiya is a tool to access secrets stored in a Google Bucket and encrypted by Google Key Management Service (KMS).
-
+Kiya is a tool to access secrets stored in Google Secret Manager(GSM) or a Google Bucket and encrypted by Google Key Management Service (KMS).
 
 ### Introduction
+
 Developing and deploying applications to execution environments (dev,staging,production) requires all kinds of secrets.
 Both continuous development enviroment and production environment require credentials to access other resources.
-Examples are passwords, service accounts, TLS certificates, API tokens and Encryption Keys. 
-These secrets should be managed with great care.
-This means secrets must be stored encrypted on reliable shared storage and its access must controlled by AAA (authentication, authorisation and auditing).
+Examples are passwords, service accounts, TLS certificates, API tokens and Encryption Keys. These secrets should be
+managed with great care. This means secrets must be stored encrypted on reliable shared storage and its access must
+controlled by AAA (authentication, authorisation and auditing).
 
-**Kiya** is a simple tool that mediates between stored encrypted secrets in a bucket and a managed encyrption key in a keyring. It requires an authenticated Google account and permissions for that account to read secrets and perform encryption and decryption.
+**Kiya** is a simple tool that eases the access to the secrets stored in GSM or KMS. It requires an authenticated Google account and permissions for that account to read secrets and perform
+encryption and decryption.
 
 #### Labeled secrets
-A secret must have a label and a plain text representation of its value.
-A label is typically composed of a domain or site or application (the parent key) and a secret key, e.g. google.gmail/info@mars.planets.
-A label must have at least one parent key (lowercase with or without dots).
-The value must be a string which has a maximum length of 64Kb.
+
+A secret must have a label and a plain text representation of its value. A label is typically composed of a domain or
+site or application (the parent key) and a secret key, e.g. google.gmail/info@mars.planets. A label must have at least
+one parent key (lowercase with or without dots). The value must be a string which has a maximum length of 64Kb.
 
 ### Prerequisites
-Kiya uses your authenticated Google account to access the Storage Bucket, KMS and Audit Logging.
-The bucket stores the encrypted secret value using the label as the storage key.
+
+Kiya uses your authenticated Google account to access the Secret Manager / Storage Bucket, KMS and Audit Logging. The bucket stores the
+encrypted secret value using the label as the storage key.
 
 	gcloud auth application-default login
-			
 
 ## Install
 
@@ -33,33 +34,48 @@ The bucket stores the encrypted secret value using the label as the storage key.
 
 ## Usage
 
-Read `setup.md` for detailed instructions how to create a bucket, a keyring, an cryption key and set the permissions.
+Read `setup.md` for detailed instructions how to setup the basic prerequisites.
 
 ### Configuration
 
-Create a file name `.kiya` in your home directory with the content for a shareable secrets profile. You can have multiple profiles for different usages.
+Create a file name `.kiya` in your home directory with the content for a shareable secrets profile. You can have
+multiple profiles for different usages. Each profile should either mention `kms` or `gsm` to be used as the `backend`.
+If no value is defined for a profile's `backend`, `kms` will be used as a default.
 
-	{
-		"teamF1": {
-			"projectID": "your-gcp-project",
-			"location": "global",
-			"keyring": "your-kiya-secrets-keyring",
-			"cryptoKey": "your-kiya-secrets-cryptokey",
-			"bucket": "your-kiya-secrets"
-		}
+```json
+{
+	"teamF1-on-kms": {
+		"backend": "kms",
+		"projectID": "your-gcp-project",
+		"location": "global",
+		"keyring": "your-kiya-secrets-keyring",
+		"cryptoKey": "your-kiya-secrets-cryptokey",
+		"bucket": "your-kiya-secrets"
+	},
+	"teamF2-on-gsm": {
+		"backend": "gsm",
+		"projectID": "another-gcp-project"
 	}
+}
+
+```
+
+You should define `location`, `keyring`, `cryptoKey` and `bucket` for KMS based profiles.
+
+For Google Secret Manager based profiles a `projectID` is only enough. 
 
 ### Store a password, _put_
 
 	kiya teamF1 put concourse/cd-pipeline mySecretPassword
-	
-In this example, `teamF1` refers to the profile in your configuration. `concourse` refers to the site or domain. `cd-pipeline` is the username which can be an email address too. `mySecretPassword` is the plain text password.
 
-If a password was already stored then you will be warned about overwriting it.
-The -quiet flag can be used to skip the confirmation prompt:
+In this example, `teamF1` refers to the profile in your configuration. `concourse` refers to the site or
+domain. `cd-pipeline` is the username which can be an email address too. `mySecretPassword` is the plain text password.
+
+If a password was already stored then you will be warned about overwriting it. The -quiet flag can be used to skip the
+confirmation prompt:
 
 	kiya -quiet teamF1 put concourse/cd-pipeline myNewSecretPassword
-	
+
 _Note: this will put a secret in your command history; better use paste, see below._
 
 ### Generate a password, _generate_
@@ -72,7 +88,7 @@ Generate a secret with length 25 store it as secret `concourse/cd-pipeline` and 
 
 	kiya teamF1 get concourse/cd-pipeline
 
-_Note: this will put a secret in your command history; better use copy, see below._	
+_Note: this will put a secret in your command history; better use copy, see below._
 
 ### List labels of stored secrets, _list_
 
@@ -80,7 +96,8 @@ _Note: this will put a secret in your command history; better use copy, see belo
 
 Specifying a filter argument will hide any keys that don't contain the filter string.
 
-The list command is also used when the command is unknown, e.g. `kiya teamF1 list redbull` shows the same results as `kiya teamF1 redbull`.
+The list command is also used when the command is unknown, e.g. `kiya teamF1 list redbull` shows the same results
+as `kiya teamF1 redbull`.
 
 ### Fill a template, _template_
 
@@ -91,7 +108,7 @@ Output will be written to stdout.
 Example contents of `template-file`:
 
     bitbucket-password={{kiya "key-to-bitbucket-password"}}
-    
+
 Kiya also provides a builtin function for base64 encoding:
 
     artifatory-hashed-password={{base64 (kiya "key-to-artifatory-password")}}
