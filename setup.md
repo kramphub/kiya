@@ -4,31 +4,38 @@
 In order to use kiya, you need a Google Cloud Platform project. See https://console.cloud.google.com.
 You will need the project id for a new kiya profile.
 
-## Google KMS
+## For Secret Manager based profiles
+
+There's nothing special to take care of. Everything's managed by GSM. 
+Just make sure that you have enough permissions by looking at [Access control (IAM) | Secret Manager Documentation | Google Cloud](https://cloud.google.com/secret-manager/docs/access-control) for the required roles.
+
+## For Key Management Service based profiles
+
+### Google KMS
 kiya uses Google KMS (Key Management Service) to encrypt and decrypt secrets.
 
-### create a keyring
+#### create a keyring
 In the console, goto IAM & Admin, Encryption keys and create a keyring, e.g. `kiya-keyring`.
 
-### create a crypto key
+#### create a crypto key
 Create a crypto key for your keyring, e.g. `kiya-cryptokey`.
 
-### set permissions
+#### set permissions
 Select your crypto key and edit permissions. 
 Add a member with your google account and role `Cloud KMS CryptoKey Encrypter/Decrypter`.
 
-## Google Storage
+### Google Storage
 kiya using Google Storage (Buckets) to store encrypted secrets using a label.
 
-### create a bucket
+#### create a bucket
 In the console, goto Storage Browser and create a bucket, e.g. `your-name-kiya-secrets`.
 Must be unique across Cloud Storage.
 
-### set permissions
+#### set permissions
 Select your bucket and edit permissions.
 Add a member with your google account and role `Storage Object Admin` for creating and listing secrets.
 
-## kiya profile
+### kiya profile
 In your .kiya file, add a new personal profile.
 
     "private": {
@@ -40,7 +47,7 @@ In your .kiya file, add a new personal profile.
         "secretChars": "optionally-specify-secret-generation-chars"
     }	
 
-### Test
+## Test
 Authenticate your account with Google.
 
     gcloud auth application-default login
