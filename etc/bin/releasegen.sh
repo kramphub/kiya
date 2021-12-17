@@ -9,6 +9,7 @@ goos() {
   case "${1}" in
   Darwin) echo darwin ;;
   Linux) echo linux ;;
+  Windows) echo windows ;;
   *) return 1 ;;
   esac
 }
@@ -31,10 +32,15 @@ for os in Darwin Linux Windows; do
     tar_context_dir="$(dirname "${dir}")"
     tar_dir="kiya"
     mkdir -p "${dir}/bin"
-    CGO_ENABLED=0 GOOS=$(goos "${os}") GOARCH=$(goarch "${arch}") \
+    echo GOOS=$(goos "${os}") GOARCH=$(goarch "${arch}") \
       go build \
       -a \
-      -installsuffix cgo \
+      -ldflags "-X 'main.version=$(git tag -l --points-at HEAD)'" \
+      -o "${dir}/bin/kiya" \
+      ${SRCS}
+    GOOS=$(goos "${os}") GOARCH=$(goarch "${arch}") \
+      go build \
+      -a \
       -ldflags "-X 'main.version=$(git tag -l --points-at HEAD)'" \
       -o "${dir}/bin/kiya" \
       ${SRCS}
