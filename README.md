@@ -23,10 +23,15 @@ one parent key (lowercase with or without dots). The value must be a string whic
 
 ### Prerequisites
 
+#### GCP
 Kiya uses your authenticated Google account to access the Secret Manager / Storage Bucket, KMS and Audit Logging. The bucket stores the
 encrypted secret value using the label as the storage key.
 
 	gcloud auth application-default login
+
+#### AWS
+Kiya uses your AWS credentials to access the AWS Parameter Store. 
+All values are stored using the specified encryption key ID or the default key set for your AWS Account.
 
 ## Install
 
@@ -39,8 +44,9 @@ Read `setup.md` for detailed instructions how to setup the basic prerequisites.
 ### Configuration
 
 Create a file name `.kiya` in your home directory with the content for a shareable secrets profile. You can have
-multiple profiles for different usages. Each profile should either mention `kms` or `gsm` to be used as the `backend`.
-If no value is defined for a profile's `backend`, `kms` will be used as a default.
+multiple profiles for different usages. Each profile should either mention `kms`, `gsm` or `ssm` to be used as the `backend`.
+If no value is defined for a profile's `backend`, `kms` will be used as a default available for GCP.
+Use the backend `ssm` if you are storing keys in AWS Parameter Store as part of the System Management services.
 
 ```json
 {
@@ -55,14 +61,21 @@ If no value is defined for a profile's `backend`, `kms` will be used as a defaul
 	"teamF2-on-gsm": {
 		"backend": "gsm",
 		"projectID": "another-gcp-project"
-	}
+	},
+	"ag5": {
+        "backend": "ssm",
+        "location": "eu-central-1"
+    }
 }
 
 ```
-
+#### GCP
 You should define `location`, `keyring`, `cryptoKey` and `bucket` for KMS based profiles.
-
 For Google Secret Manager based profiles a `projectID` is only enough. 
+
+#### AWS
+You should define `location` for SSM (AWS Systems Management) based profiles ; its value is a AWS region.
+The `cryptoKey` is optional and must be set if you do not want to use the default key setup for your AWS Account.
 
 ### Store a password, _put_
 
