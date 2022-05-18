@@ -17,7 +17,7 @@ type Backend interface {
 type Key struct {
 	Name      string
 	CreatedAt time.Time
-	Owner     string // @deprecated, use Info
+	Owner     string
 	Info      string
 }
 
