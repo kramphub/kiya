@@ -159,6 +159,8 @@ func main() {
 
 func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
 	switch p.Backend {
+	case "ssm":
+		return backend.NewAWSParameterStore(ctx, p)
 	case "gsm":
 		// Create GSM client
 		gsmClient, err := secretmanager.NewClient(ctx)

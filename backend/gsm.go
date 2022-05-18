@@ -62,7 +62,8 @@ func (b *GSM) List(ctx context.Context, p *Profile) ([]Key, error) {
 		keys = append(keys, Key{
 			Name:      b.fullNameToName(secret.Name),
 			CreatedAt: secret.CreateTime.AsTime(),
-			Owner:     "<Unknown>", // no owner
+			Info:      "creator: <Unknown>", // no owner
+			Owner:     "<Unknown>",
 		})
 	}
 

@@ -101,6 +101,7 @@ func (b *KMS) List(ctx context.Context, p *Profile) ([]Key, error) {
 		keys = append(keys, Key{
 			Name:      next.Name,
 			CreatedAt: next.Created,
+			Info:      fmt.Sprintf("creator: %s", next.Owner),
 			Owner:     next.Owner,
 		})
 	}
