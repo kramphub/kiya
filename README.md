@@ -73,7 +73,7 @@ Use the backend `ssm` if you are storing keys in AWS Parameter Store as part of 
 ```
 #### GCP
 You should define `location`, `keyring`, `cryptoKey` and `bucket` for KMS based profiles.
-For Google Secret Manager based profiles a `projectID` is only enough. 
+For Google Secret Manager based profiles a `projectID` is sufficient. 
 
 #### AWS
 You should define `location` for SSM (AWS Systems Management) based profiles ; its value is an AWS region.
