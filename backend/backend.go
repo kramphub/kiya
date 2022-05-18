@@ -18,6 +18,7 @@ type Key struct {
 	Name      string
 	CreatedAt time.Time
 	Owner     string
+	Info      string
 }
 
 // Profile describes a single profile in a .kiya configuration

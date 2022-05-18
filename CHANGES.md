@@ -1,5 +1,13 @@
 # Changes
 
+### v1.10.0
+
+- add AWS Parameter Store backend
+
+### v1.9.0
+
+- add Google Secret Manager backend
+
 ### v1.8.1
 
 - fallback to list command if argument is not a known command.
