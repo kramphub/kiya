@@ -2,7 +2,10 @@
 
 <img align="right" src="kea.jpg">
 
-Kiya is a tool to access secrets stored in Google Secret Manager(GSM) or a Google Bucket and encrypted by Google Key Management Service (KMS).
+Kiya is a tool to manage secrets stored in any of:
+- Google Secret Manager(GSM)
+- Google Bucket and encrypted by Google Key Management Service (KMS)
+- Amazon Web Services Parameter Store (SSM)
 
 ### Introduction
 
@@ -12,8 +15,7 @@ Examples are passwords, service accounts, TLS certificates, API tokens and Encry
 managed with great care. This means secrets must be stored encrypted on reliable shared storage and its access must
 controlled by AAA (authentication, authorisation and auditing).
 
-**Kiya** is a simple tool that eases the access to the secrets stored in GSM or KMS. It requires an authenticated Google account and permissions for that account to read secrets and perform
-encryption and decryption.
+**Kiya** is a simple tool that eases the access to the secrets stored in GSM,KMS or SSM. It requires an authenticated  account and permissions for that account to read secrets and perform encryption and decryption.
 
 #### Labeled secrets
 
@@ -24,13 +26,13 @@ one parent key (lowercase with or without dots). The value must be a string whic
 ### Prerequisites
 
 #### GCP
-Kiya uses your authenticated Google account to access the Secret Manager / Storage Bucket, KMS and Audit Logging. The bucket stores the
-encrypted secret value using the label as the storage key.
+Kiya uses your authenticated Google account to access the Secret Manager / Storage Bucket, KMS and Audit Logging. 
+The bucket stores the encrypted secret value using the label as the storage key.
 
 	gcloud auth application-default login
 
 #### AWS
-Kiya uses your AWS credentials to access the AWS Parameter Store. 
+Kiya uses your AWS credentials to access the AWS Parameter Store (part of Systems Management). 
 All values are stored using the specified encryption key ID or the default key set for your AWS Account.
 
 ## Install
@@ -74,7 +76,7 @@ You should define `location`, `keyring`, `cryptoKey` and `bucket` for KMS based 
 For Google Secret Manager based profiles a `projectID` is only enough. 
 
 #### AWS
-You should define `location` for SSM (AWS Systems Management) based profiles ; its value is a AWS region.
+You should define `location` for SSM (AWS Systems Management) based profiles ; its value is an AWS region.
 The `cryptoKey` is optional and must be set if you do not want to use the default key setup for your AWS Account.
 
 ### Store a password, _put_

@@ -53,8 +53,8 @@ func (s *AWSParameterStore) List(ctx context.Context, p *Profile) (list []Key, e
 			list = append(list, Key{
 				Name:      *each.Name,
 				CreatedAt: *each.LastModifiedDate,
-				// Owner information is not available in AWS Parameter Store; provide some other metadata
-				Owner: fmt.Sprintf("type: %v datatype: %v version: %v", *each.Type, *each.DataType, *each.Version),
+				Info:      fmt.Sprintf("type: %v datatype: %v version: %v", *each.Type, *each.DataType, *each.Version),
+				Owner:     "<Unknown>",
 			})
 		}
 		if output.NextToken != nil {

@@ -29,7 +29,7 @@ func commandList(ctx context.Context, b backend.Backend, target *backend.Profile
 				continue
 			}
 		}
-		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, k.Name), k.CreatedAt.Format(time.RFC822), k.Owner})
+		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, k.Name), k.CreatedAt.Format(time.RFC822), k.Info})
 	}
 
 	if len(filter) > 0 {
@@ -38,7 +38,7 @@ func commandList(ctx context.Context, b backend.Backend, target *backend.Profile
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetAutoWrapText(false)
-	table.SetHeader([]string{"Copy to clipboard command", "Created", "Creator"})
+	table.SetHeader([]string{"Copy to clipboard command", "Created", "Info"})
 	table.AppendBulk(data)
 	table.Render() // writes to stdout
 }

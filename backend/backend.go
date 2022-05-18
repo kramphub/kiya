@@ -17,7 +17,8 @@ type Backend interface {
 type Key struct {
 	Name      string
 	CreatedAt time.Time
-	Owner     string
+	Owner     string // @deprecated, use Info
+	Info      string
 }
 
 // Profile describes a single profile in a .kiya configuration
