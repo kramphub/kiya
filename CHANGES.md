@@ -1,5 +1,9 @@
 # Changes
 
+### v1.10.1
+
+- fix aws listing (use recursive search)
+
 ### v1.10.0
 
 - add AWS Parameter Store backend
