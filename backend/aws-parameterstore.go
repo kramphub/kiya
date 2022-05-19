@@ -42,7 +42,8 @@ func (s *AWSParameterStore) Get(ctx context.Context, p *Profile, key string) ([]
 func (s *AWSParameterStore) List(ctx context.Context, p *Profile) (list []Key, err error) {
 	input := &ssm.GetParametersByPathInput{
 		Path:       aws.String("/"),
-		MaxResults: aws.Int64(10), // is the maximum
+		MaxResults: aws.Int64(10), // is the documented maximum
+		Recursive:  aws.Bool(true),
 	}
 	for {
 		output, err := s.client.GetParametersByPath(input)
