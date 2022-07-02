@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"io/ioutil"
 	"log"
 	"os"
@@ -169,6 +171,16 @@ func getBackend(ctx context.Context, p *backend.Profile, masterPassword string) 
 		}
 
 		return backend.NewGSM(gsmClient), nil
+	case "akv":
+		cred, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		client, err := azsecrets.NewClient(p.VaultUrl, cred, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return backend.NewAKV(client), nil
 	case "file":
 		return backend.NewFileStore(p.Location, p.ProjectID, masterPassword), nil
 	case "kms":

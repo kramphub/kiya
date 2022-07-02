@@ -6,6 +6,8 @@ Kiya is a tool to manage secrets stored in any of:
 - Google Secret Manager(GSM)
 - Google Bucket and encrypted by Google Key Management Service (KMS)
 - Amazon Web Services Parameter Store (SSM)
+- Azure Key Vault (AKV)
+- File on local disc
 
 ### Introduction
 
@@ -34,6 +36,12 @@ The bucket stores the encrypted secret value using the label as the storage key.
 #### AWS
 Kiya uses your AWS credentials to access the AWS Parameter Store (part of Systems Management). 
 All values are stored using the specified encryption key ID or the default key set for your AWS Account.
+
+#### AKV
+Kiya uses your authenticated default credentials. Make sure you have the Azure CLI installed.
+All secrets are stored with the default config provided in your vault.
+
+    az login
 
 #### File
 When using the file backend, make sure Kiya is allowed to read and write to the provided location.
@@ -72,6 +80,10 @@ Use the backend `ssm` if you are storing keys in AWS Parameter Store as part of 
         "backend": "file",
         "projectID": "my-file-name"
     },
+    "teamF4-on-akv": {
+      "backend": "akv",
+      "vaultUrl": "https://<vault-name>.vault.azure.net"
+    },
 	"ag5": {
         "backend": "ssm",
         "location": "eu-central-1"
@@ -87,9 +99,14 @@ For Google Secret Manager based profiles a `projectID` is sufficient.
 You should define `location` for SSM (AWS Systems Management) based profiles ; its value is an AWS region.
 The `cryptoKey` is optional and must be set if you do not want to use the default key setup for your AWS Account.
 
+#### AKV
+You should define the `vaultUrl` for AKV (Azure Key Vault) based profiles ; its value is the URI used to identify a vault on Azure.
+
 #### File
-You should define `location` for the file store to be created. Defaults to $HOME.
-The `projectID` is used as a prefix for the file name. Defaults to $HOME/projectID.secrets.kiya
+You should define `projectID` as it is used as a prefix for the file name.
+Optionally, you could provide `location` in order to store the file at a location of your choosing.
+
+If no `location` is provided, $HOME/<projectID.secrets.kiya will be used.
 
 When retrieving a password using **put** or **get**, provide the -pw my-master-password flag
 

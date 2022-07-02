@@ -30,5 +30,6 @@ type Profile struct {
 	Keyring     string
 	CryptoKey   string
 	Bucket      string
+	VaultUrl    string
 	SecretRunes []rune
 }
