@@ -11,4 +11,5 @@ var (
 	oOutputFilename = flag.String("o", "", "if not empty then write the secret to a file else write to stdout (get)")
 	oCreatedAt      = flag.String("ca", "", "if not empty then use this formatted timestamp (RFC3339) as the creation date of the new secret")
 	oQuiet          = flag.Bool("quiet", false, "don't prompt for confirmation on destructive actions")
+	oMasterPassword = flag.String("pw", "", "provide a master password for encryption (only used by disc based backend)")
 )

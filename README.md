@@ -35,6 +35,10 @@ The bucket stores the encrypted secret value using the label as the storage key.
 Kiya uses your AWS credentials to access the AWS Parameter Store (part of Systems Management). 
 All values are stored using the specified encryption key ID or the default key set for your AWS Account.
 
+#### File
+When using the file backend, make sure Kiya is allowed to read and write to the provided location.
+The file store is created with permission 0600
+
 ## Install
 
 	go install github.com/kramphub/kiya/cmd/kiya@latest
@@ -64,6 +68,10 @@ Use the backend `ssm` if you are storing keys in AWS Parameter Store as part of 
 		"backend": "gsm",
 		"projectID": "another-gcp-project"
 	},
+    "teamF3-on-file": {
+        "backend": "file",
+        "projectID": "my-file-name"
+    },
 	"ag5": {
         "backend": "ssm",
         "location": "eu-central-1"
@@ -79,6 +87,17 @@ For Google Secret Manager based profiles a `projectID` is sufficient.
 You should define `location` for SSM (AWS Systems Management) based profiles ; its value is an AWS region.
 The `cryptoKey` is optional and must be set if you do not want to use the default key setup for your AWS Account.
 
+#### File
+You should define `location` for the file store to be created. Defaults to $HOME.
+The `projectID` is used as a prefix for the file name. Defaults to $HOME/projectID.secrets.kiya
+
+When retrieving a password using **put** or **get**, provide the -pw my-master-password flag
+
+Storing or remembering the master password is the responsibility of the user. 
+You can use different master passwords for different keys.
+
+For the best security, it is best not to store your master password on the same device as your store.
+
 ### Store a password, _put_
 
 	kiya teamF1 put concourse/cd-pipeline mySecretPassword
@@ -93,6 +112,8 @@ confirmation prompt:
 
 _Note: this will put a secret in your command history; better use paste, see below._
 
+_Note2: when using a file based backend, provide the -pw my-master-password flag_
+
 ### Generate a password, _generate_
 
 	kiya teamF1 generate concourse/cd-pipeline 25
@@ -104,6 +125,8 @@ Generate a secret with length 25 store it as secret `concourse/cd-pipeline` and 
 	kiya teamF1 get concourse/cd-pipeline
 
 _Note: this will put a secret in your command history; better use copy, see below._
+
+_Note2: when using a file based backend, provide the -pw my-master-password flag_
 
 ### List labels of stored secrets, _list_
 
@@ -161,3 +184,7 @@ Run
 You do not have access to encrypted secrets from `some-bucket-name`.
 
 &copy; 2017 kramphub.com. Apache License v2.
+
+### 3. Error
+    message authentication failed
+Make sure to run **put** or **get** with the -pw flag containing a master password.

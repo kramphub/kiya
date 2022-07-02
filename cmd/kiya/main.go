@@ -48,7 +48,7 @@ func main() {
 		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
 
-	b, err := getBackend(ctx, &target)
+	b, err := getBackend(ctx, &target, *oMasterPassword)
 	if err != nil {
 		log.Fatalf("failed to intialize the secret provider backend, %s", err.Error())
 	}
@@ -157,7 +157,7 @@ func main() {
 	}
 }
 
-func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
+func getBackend(ctx context.Context, p *backend.Profile, masterPassword string) (backend.Backend, error) {
 	switch p.Backend {
 	case "ssm":
 		return backend.NewAWSParameterStore(ctx, p)
@@ -169,7 +169,8 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		}
 
 		return backend.NewGSM(gsmClient), nil
-
+	case "file":
+		return backend.NewFileStore(p.Location, p.ProjectID, masterPassword), nil
 	case "kms":
 		fallthrough
 	default:
@@ -178,7 +179,6 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		// Create the Bucket client
 		storageService, err := cloudstore.NewClient(ctx)
 		if err != nil {
