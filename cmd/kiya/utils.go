@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/kramphub/kiya/backend"
+	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/term"
 	"io/ioutil"
 	"log"
@@ -54,6 +55,11 @@ func promptForPassword() []byte {
 
 	if err != nil {
 		log.Fatal("Error while reading password from standard in", err)
+	}
+
+	err = passwordvalidator.Validate(string(password), 50)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return password
 }

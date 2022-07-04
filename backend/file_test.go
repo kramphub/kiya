@@ -6,10 +6,11 @@ import (
 )
 
 func TestEncryptDecryptSuccess(t *testing.T) {
-	fileBackend := NewFileStore("./", "test", "myMasterPassword")
+	fileBackend := NewFileStore("./", "test") //myMasterPassword
+	fileBackend.SetMasterPassword([]byte("myMasterPassword"))
 
 	testData := []byte("testdata")
-	encryptedData, err := fileBackend.encrypt(testData, fileBackend.cryptoKey)
+	encryptedData, err := fileBackend.encrypt(testData, fileBackend.masterPassword)
 	if err != nil {
 		t.Errorf("Could not encrypt data: %v", err)
 	}
@@ -17,7 +18,7 @@ func TestEncryptDecryptSuccess(t *testing.T) {
 		t.Errorf("Expected <encrypted>: %s, got nil", testData)
 	}
 
-	decryptedData, err := fileBackend.decrypt(encryptedData, fileBackend.cryptoKey)
+	decryptedData, err := fileBackend.decrypt(encryptedData, fileBackend.masterPassword)
 	if err != nil {
 		t.Errorf("Could not decrypt data: %v", err)
 	}
@@ -27,10 +28,11 @@ func TestEncryptDecryptSuccess(t *testing.T) {
 }
 
 func TestDecryptWrongMasterPassword(t *testing.T) {
-	fileBackend := NewFileStore("./", "test", "myMasterPassword")
+	fileBackend := NewFileStore("./", "test")
+	fileBackend.SetMasterPassword([]byte("myMasterPassword"))
 
 	testData := []byte("testdata")
-	encryptedData, err := fileBackend.encrypt(testData, fileBackend.cryptoKey)
+	encryptedData, err := fileBackend.encrypt(testData, []byte("myMasterPassword"))
 	if err != nil {
 		t.Errorf("Could not encrypt data: %v", err)
 	}
@@ -45,7 +47,8 @@ func TestDecryptWrongMasterPassword(t *testing.T) {
 }
 
 func TestDecryptDataMismatch(t *testing.T) {
-	fileBackend := NewFileStore("./", "test", "myMasterPassword")
+	fileBackend := NewFileStore("./", "test")
+	fileBackend.SetMasterPassword([]byte("myMasterPassword"))
 
 	testData := []byte("testdata")
 	_, err := fileBackend.decrypt(testData, []byte("myIncorrectPassword"))
@@ -55,11 +58,23 @@ func TestDecryptDataMismatch(t *testing.T) {
 }
 
 func TestEncryptAlwaysDifferent(t *testing.T) {
-	fileBackend := NewFileStore("./", "test", "myMasterPassword")
+	fileBackend := NewFileStore("./", "test")
+	fileBackend.SetMasterPassword([]byte("myMasterPassword"))
 
 	testData := []byte("testdata")
-	encryptedData, _ := fileBackend.encrypt(testData, fileBackend.cryptoKey)
-	encryptedData2, _ := fileBackend.encrypt(testData, fileBackend.cryptoKey)
+	encryptedData, _ := fileBackend.encrypt(testData, fileBackend.masterPassword)
+	encryptedData2, _ := fileBackend.encrypt(testData, fileBackend.masterPassword)
+	if bytes.Compare(encryptedData, encryptedData2) == 0 {
+		t.Error("Expected data to be different, got equal")
+	}
+}
+
+func TestNoMasterPasswordSet(t *testing.T) {
+	fileBackend := NewFileStore("./", "test")
+
+	testData := []byte("testdata")
+	encryptedData, _ := fileBackend.encrypt(testData, fileBackend.masterPassword)
+	encryptedData2, _ := fileBackend.encrypt(testData, fileBackend.masterPassword)
 	if bytes.Compare(encryptedData, encryptedData2) == 0 {
 		t.Error("Expected data to be different, got equal")
 	}
