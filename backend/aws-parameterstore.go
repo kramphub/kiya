@@ -123,7 +123,6 @@ func (s *AWSParameterStore) Close() error {
 	return nil
 }
 
-// SetMasterPassword is not relevant for this backend
-func (s *AWSParameterStore) SetMasterPassword(_ []byte) {
+func (s *AWSParameterStore) SetParameter(key string, value interface{}) {
 	// noop
 }

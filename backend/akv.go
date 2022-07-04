@@ -73,7 +73,6 @@ func (b *AKV) Close() error {
 	return nil
 }
 
-// SetMasterPassword is not relevant for this backend
-func (b *AKV) SetMasterPassword(_ []byte) {
+func (b *AKV) SetParameter(key string, value interface{}) {
 	// noop
 }

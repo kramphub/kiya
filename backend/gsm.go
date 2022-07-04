@@ -120,8 +120,7 @@ func (b *GSM) Close() error {
 	return b.client.Close()
 }
 
-// SetMasterPassword is not relevant for this backend
-func (b *GSM) SetMasterPassword(_ []byte) {
+func (b *GSM) SetParameter(key string, value interface{}) {
 	// noop
 }
 

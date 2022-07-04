@@ -188,7 +188,6 @@ func (b *KMS) storeSecret(p *Profile, key, encryptedValue string) error {
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 
-// SetPassword is not relevant for this backend
-func (b *KMS) SetMasterPassword(_ []byte) {
+func (b *KMS) SetParameter(key string, value interface{}) {
 	// noop
 }

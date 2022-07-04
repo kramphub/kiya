@@ -23,11 +23,6 @@ func commandPutPasteGenerate(
 		}
 	}
 
-	if shouldPromptForPassword(b) {
-		pass := promptForPassword()
-		b.SetMasterPassword(pass)
-	}
-
 	if err := b.Put(ctx, target, key, value); err != nil {
 		log.Fatal(err)
 	}

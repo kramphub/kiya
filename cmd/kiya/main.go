@@ -66,6 +66,12 @@ func main() {
 	case "put":
 		key := flag.Arg(2)
 		value := flag.Arg(3)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		if len(value) != 0 {
 			commandPutPasteGenerate(ctx, b, &target, "put", key, value, doPrompt)
 		} else {
@@ -80,6 +86,12 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
+		
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		commandPutPasteGenerate(ctx, b, &target, "paste", key, value, doPrompt)
 
 	case "generate":
@@ -104,12 +116,24 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		commandPutPasteGenerate(ctx, b, &target, "generate", key, secret, mustPrompt)
 		// make it available on the clipboard, ignore error
 		clipboard.WriteAll(secret)
 
 	case "copy":
 		key := flag.Arg(2)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		value, err := b.Get(ctx, &target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
@@ -123,7 +147,7 @@ func main() {
 
 		if shouldPromptForPassword(b) {
 			pass := promptForPassword()
-			b.SetMasterPassword(pass)
+			b.SetParameter("masterPassword", pass)
 		}
 
 		bytes, err := b.Get(ctx, &target, key)
@@ -157,6 +181,11 @@ func main() {
 		targetKey := sourceKey
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)
+		}
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
 		}
 		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
 	default:

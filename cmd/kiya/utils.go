@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/kramphub/kiya/backend"
-	passwordvalidator "github.com/wagslane/go-password-validator"
 	"golang.org/x/term"
 	"io/ioutil"
 	"log"
@@ -57,9 +56,10 @@ func promptForPassword() []byte {
 		log.Fatal("Error while reading password from standard in", err)
 	}
 
-	err = passwordvalidator.Validate(string(password), 50)
-	if err != nil {
-		log.Fatal(err)
+	if len(password) == 0 {
+		log.Fatal("Password should have at least one character.")
 	}
+
+	log.Print("[WARNING]: Make sure you use a secure and strong master password.")
 	return password
 }

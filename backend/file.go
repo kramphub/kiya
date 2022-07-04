@@ -228,6 +228,14 @@ func (f *FileStore) createStoreIfNotExists() error {
 	return nil
 }
 
+func (f *FileStore) SetParameter(key string, value interface{}) {
+	if key == "masterPassword" {
+		if val, ok := value.([]byte); ok {
+			f.masterPassword = val
+		}
+	}
+}
+
 // makeNonce generates a secure random nonce used for encryption of the passwords
 func makeNonce(len int) []byte {
 	salt := make([]byte, len)
