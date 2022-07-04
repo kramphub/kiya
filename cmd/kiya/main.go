@@ -50,7 +50,7 @@ func main() {
 		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
 
-	b, err := getBackend(ctx, &target, *oMasterPassword)
+	b, err := getBackend(ctx, &target)
 	if err != nil {
 		log.Fatalf("failed to intialize the secret provider backend, %s", err.Error())
 	}
@@ -121,6 +121,11 @@ func main() {
 	case "get":
 		key := flag.Arg(2)
 
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetMasterPassword(pass)
+		}
+
 		bytes, err := b.Get(ctx, &target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
@@ -159,7 +164,7 @@ func main() {
 	}
 }
 
-func getBackend(ctx context.Context, p *backend.Profile, masterPassword string) (backend.Backend, error) {
+func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
 	switch p.Backend {
 	case "ssm":
 		return backend.NewAWSParameterStore(ctx, p)
@@ -182,7 +187,7 @@ func getBackend(ctx context.Context, p *backend.Profile, masterPassword string) 
 		}
 		return backend.NewAKV(client), nil
 	case "file":
-		return backend.NewFileStore(p.Location, p.ProjectID, masterPassword), nil
+		return backend.NewFileStore(p.Location, p.ProjectID), nil
 	case "kms":
 		fallthrough
 	default:

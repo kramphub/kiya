@@ -3,10 +3,13 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/kramphub/kiya/backend"
+	"golang.org/x/term"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
+	"syscall"
 )
 
 func readFromStdIn() string {
@@ -35,4 +38,22 @@ func promptForYes(message string) bool {
 	fmt.Print(message)
 	yn, _ := reader.ReadString('\n')
 	return strings.HasPrefix(yn, "Y") || strings.HasPrefix(yn, "y")
+}
+
+func shouldPromptForPassword(b backend.Backend) bool {
+	switch b.(type) {
+	case *backend.FileStore:
+		return true
+	default:
+		return false
+	}
+}
+func promptForPassword() []byte {
+	fmt.Println("Enter master password: ")
+	password, err := term.ReadPassword(syscall.Stdin)
+
+	if err != nil {
+		log.Fatal("Error while reading password from standard in", err)
+	}
+	return password
 }

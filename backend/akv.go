@@ -72,3 +72,8 @@ func (b *AKV) Delete(ctx context.Context, _ *Profile, key string) error {
 func (b *AKV) Close() error {
 	return nil
 }
+
+// SetMasterPassword is not relevant for this backend
+func (b *AKV) SetMasterPassword(_ []byte) {
+	// noop
+}

@@ -16,18 +16,16 @@ import (
 )
 
 type FileStore struct {
-	storeLocation string
-	projectID     string
-	cryptoKey     []byte
+	storeLocation  string
+	projectID      string
+	masterPassword []byte
 }
 
-func NewFileStore(storeLocation, projectID, cryptoKey string) *FileStore {
-	disc := &FileStore{
-		projectID: projectID,
-		cryptoKey: []byte(cryptoKey),
+func NewFileStore(storeLocation, projectID string) *FileStore {
+	return &FileStore{
+		projectID:     projectID,
+		storeLocation: storeFileLocation(storeLocation, projectID),
 	}
-	disc.storeLocation = disc.secretStoreLocation(storeLocation, projectID)
-	return disc
 }
 
 type FileStoreEntry struct {
@@ -36,15 +34,15 @@ type FileStoreEntry struct {
 }
 
 // Get reads the store from file, fetches and decrypt the value for given key
-func (d *FileStore) Get(_ context.Context, _ *Profile, key string) ([]byte, error) {
-	storeData, err := d.getStore()
+func (f *FileStore) Get(_ context.Context, _ *Profile, key string) ([]byte, error) {
+	storeData, err := f.getStore()
 	if err != nil {
 		return nil, err
 	}
 
 	for _, data := range storeData {
 		if data.KeyInfo.Name == key {
-			data, err := d.decrypt(data.Value, d.cryptoKey)
+			data, err := f.decrypt(data.Value, f.masterPassword)
 			if err != nil {
 				return nil, fmt.Errorf("message authentication failed")
 			}
@@ -55,8 +53,8 @@ func (d *FileStore) Get(_ context.Context, _ *Profile, key string) ([]byte, erro
 }
 
 // List reads the store from file, and fetch all keys
-func (d *FileStore) List(_ context.Context, _ *Profile) (keys []Key, err error) {
-	storeData, err := d.getStore()
+func (f *FileStore) List(_ context.Context, _ *Profile) (keys []Key, err error) {
+	storeData, err := f.getStore()
 	if err != nil {
 		return nil, err
 	}
@@ -67,8 +65,8 @@ func (d *FileStore) List(_ context.Context, _ *Profile) (keys []Key, err error) 
 }
 
 // CheckExists checks if given key exists in the (file)store
-func (d *FileStore) CheckExists(_ context.Context, _ *Profile, key string) (bool, error) {
-	storeData, err := d.getStore()
+func (f *FileStore) CheckExists(_ context.Context, _ *Profile, key string) (bool, error) {
+	storeData, err := f.getStore()
 	if err != nil {
 		return false, err
 	}
@@ -82,11 +80,11 @@ func (d *FileStore) CheckExists(_ context.Context, _ *Profile, key string) (bool
 }
 
 // Put a new Key with encrypted password in the store. Put overwrites the entire store file with the updated store
-func (d *FileStore) Put(_ context.Context, _ *Profile, key, value string) error {
-	if err := d.createStoreIfNotExists(); err != nil {
+func (f *FileStore) Put(_ context.Context, _ *Profile, key, value string) error {
+	if err := f.createStoreIfNotExists(); err != nil {
 		return err
 	}
-	encryptedData, err := d.encrypt([]byte(value), d.cryptoKey)
+	encryptedData, err := f.encrypt([]byte(value), f.masterPassword)
 	if err != nil {
 		return err
 	}
@@ -107,7 +105,7 @@ func (d *FileStore) Put(_ context.Context, _ *Profile, key, value string) error 
 	}
 
 	var store []FileStoreEntry
-	discStoreEntries, err := d.getStore()
+	discStoreEntries, err := f.getStore()
 	if err != nil {
 		return err
 	}
@@ -119,15 +117,15 @@ func (d *FileStore) Put(_ context.Context, _ *Profile, key, value string) error 
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(d.storeLocation, data, 0600); err != nil {
+	if err := ioutil.WriteFile(f.storeLocation, data, 0600); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Delete a key from the store. Delete overwrites the entire store file with the updated store values
-func (d *FileStore) Delete(_ context.Context, _ *Profile, key string) error {
-	discStoreEntries, err := d.getStore()
+func (f *FileStore) Delete(_ context.Context, _ *Profile, key string) error {
+	discStoreEntries, err := f.getStore()
 	if err != nil {
 		return err
 	}
@@ -146,19 +144,24 @@ func (d *FileStore) Delete(_ context.Context, _ *Profile, key string) error {
 			return err
 		}
 	}
-	if err := ioutil.WriteFile(d.storeLocation, data, 0600); err != nil {
+	if err := ioutil.WriteFile(f.storeLocation, data, 0600); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (d *FileStore) Close() error {
+func (f *FileStore) Close() error {
 	return nil
 }
 
+// SetMasterPassword is not relevant for this backend
+func (f *FileStore) SetMasterPassword(password []byte) {
+	f.masterPassword = password
+}
+
 // encrypt data based on the argon2 hashing algorithm and xchacha20 cipher algorithm
-func (d *FileStore) encrypt(data, pass []byte) ([]byte, error) {
+func (f *FileStore) encrypt(data, pass []byte) ([]byte, error) {
 	salt := makeNonce(16)
 	key := argon2.Key(pass, salt, 3, 32*1024, 4, 32)
 	cipher, err := chacha20poly1305.NewX(key)
@@ -171,7 +174,7 @@ func (d *FileStore) encrypt(data, pass []byte) ([]byte, error) {
 }
 
 // decrypt data based on the argon2 hashing algorithm and xchacha20 cipher algorithm
-func (d *FileStore) decrypt(data, pass []byte) ([]byte, error) {
+func (f *FileStore) decrypt(data, pass []byte) ([]byte, error) {
 	if len(data) < 40 {
 		return nil, errors.New("data has incorrect format")
 	}
@@ -192,25 +195,12 @@ func (d *FileStore) decrypt(data, pass []byte) ([]byte, error) {
 	return plaintext, nil
 }
 
-// makeNonce generates a secure random nonce used for encryption of the passwords
-func makeNonce(len int) []byte {
-	salt := make([]byte, len)
-	n, err := rand.Reader.Read(salt)
-	if err != nil {
-		panic(err)
-	}
-	if n != len {
-		panic("An error occurred while generating salt")
-	}
-	return salt
-}
-
 // getStore loads the file based store from disc
-func (d *FileStore) getStore() ([]FileStoreEntry, error) {
-	if err := d.createStoreIfNotExists(); err != nil {
+func (f *FileStore) getStore() ([]FileStoreEntry, error) {
+	if err := f.createStoreIfNotExists(); err != nil {
 		return nil, err
 	}
-	data, err := ioutil.ReadFile(d.storeLocation)
+	data, err := ioutil.ReadFile(f.storeLocation)
 	if err != nil {
 		return nil, err
 	}
@@ -224,19 +214,11 @@ func (d *FileStore) getStore() ([]FileStoreEntry, error) {
 	return store, nil
 }
 
-// secretStoreLocation calculates the path to the file based store
-func (d *FileStore) secretStoreLocation(location, projectID string) string {
-	if len(location) == 0 {
-		location = path.Join(os.Getenv("HOME"), fmt.Sprintf("%s.secrets.kiya", projectID))
-	}
-	return location
-}
-
 // createStoreIfNotExists creates the file store on disc if it does not exists and initializes with an empty value
-func (d *FileStore) createStoreIfNotExists() error {
-	if _, err := os.Stat(d.storeLocation); err != nil {
+func (f *FileStore) createStoreIfNotExists() error {
+	if _, err := os.Stat(f.storeLocation); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			err = ioutil.WriteFile(d.storeLocation, []byte(""), 0600)
+			err = ioutil.WriteFile(f.storeLocation, []byte(""), 0600)
 			if err != nil {
 				return err
 			}
@@ -244,4 +226,25 @@ func (d *FileStore) createStoreIfNotExists() error {
 		return err
 	}
 	return nil
+}
+
+// makeNonce generates a secure random nonce used for encryption of the passwords
+func makeNonce(len int) []byte {
+	salt := make([]byte, len)
+	n, err := rand.Reader.Read(salt)
+	if err != nil {
+		panic(err)
+	}
+	if n != len {
+		panic("An error occurred while generating salt")
+	}
+	return salt
+}
+
+// secretStoreLocation calculates the path to the file based store
+func storeFileLocation(location, projectID string) string {
+	if len(location) == 0 {
+		location = path.Join(os.Getenv("HOME"), fmt.Sprintf("%s.secrets.kiya", projectID))
+	}
+	return location
 }
