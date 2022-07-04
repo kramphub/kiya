@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -50,5 +51,16 @@ func TestDecryptDataMismatch(t *testing.T) {
 	_, err := fileBackend.decrypt(testData, []byte("myIncorrectPassword"))
 	if err == nil {
 		t.Errorf("Expected: %s, got: %v", "data has incorrect format", err)
+	}
+}
+
+func TestEncryptAlwaysDifferent(t *testing.T) {
+	fileBackend := NewFileStore("./", "test", "myMasterPassword")
+
+	testData := []byte("testdata")
+	encryptedData, _ := fileBackend.encrypt(testData, fileBackend.cryptoKey)
+	encryptedData2, _ := fileBackend.encrypt(testData, fileBackend.cryptoKey)
+	if bytes.Compare(encryptedData, encryptedData2) == 0 {
+		t.Error("Expected data to be different, got equal")
 	}
 }
