@@ -63,7 +63,7 @@ func (d *FileStore) List(_ context.Context, _ *Profile) (keys []Key, err error) 
 	for _, info := range storeData {
 		keys = append(keys, info.KeyInfo)
 	}
-	return
+	return keys, err
 }
 
 // CheckExists checks if given key exists in the (file)store
