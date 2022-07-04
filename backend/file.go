@@ -55,16 +55,15 @@ func (d *FileStore) Get(_ context.Context, _ *Profile, key string) ([]byte, erro
 }
 
 // List reads the store from file, and fetch all keys
-func (d *FileStore) List(_ context.Context, _ *Profile) ([]Key, error) {
+func (d *FileStore) List(_ context.Context, _ *Profile) (keys []Key, err error) {
 	storeData, err := d.getStore()
 	if err != nil {
 		return nil, err
 	}
-	var keys []Key
 	for _, info := range storeData {
 		keys = append(keys, info.KeyInfo)
 	}
-	return keys, nil
+	return
 }
 
 // CheckExists checks if given key exists in the (file)store
@@ -74,8 +73,8 @@ func (d *FileStore) CheckExists(_ context.Context, _ *Profile, key string) (bool
 		return false, err
 	}
 
-	for _, data := range storeData {
-		if data.KeyInfo.Name == key {
+	for _, each := range storeData {
+		if each.KeyInfo.Name == key {
 			return true, nil
 		}
 	}
@@ -87,8 +86,10 @@ func (d *FileStore) Put(_ context.Context, _ *Profile, key, value string) error 
 	if err := d.createStoreIfNotExists(); err != nil {
 		return err
 	}
-	encryptedData := d.encrypt([]byte(value), d.cryptoKey)
-	value = ""
+	encryptedData, err := d.encrypt([]byte(value), d.cryptoKey)
+	if err != nil {
+		return err
+	}
 
 	owner := ""
 	currUser, err := user.Current()
@@ -115,6 +116,9 @@ func (d *FileStore) Put(_ context.Context, _ *Profile, key, value string) error 
 	}
 	store = append(store, newStore)
 	data, err := json.Marshal(&store)
+	if err != nil {
+		return err
+	}
 	if err := ioutil.WriteFile(d.storeLocation, data, 0600); err != nil {
 		return err
 	}
@@ -138,6 +142,9 @@ func (d *FileStore) Delete(_ context.Context, _ *Profile, key string) error {
 	// prevents "nil" being written to file
 	if len(newDiscStore) > 0 {
 		data, err = json.Marshal(&newDiscStore)
+		if err != nil {
+			return err
+		}
 	}
 	if err := ioutil.WriteFile(d.storeLocation, data, 0600); err != nil {
 		return err
@@ -151,20 +158,23 @@ func (d *FileStore) Close() error {
 }
 
 // encrypt data based on the argon2 hashing algorithm and xchacha20 cipher algorithm
-func (d *FileStore) encrypt(data, pass []byte) []byte {
+func (d *FileStore) encrypt(data, pass []byte) ([]byte, error) {
 	salt := makeNonce(16)
 	key := argon2.Key(pass, salt, 3, 32*1024, 4, 32)
 	cipher, err := chacha20poly1305.NewX(key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	nonce := makeNonce(24)
 	cipherText := cipher.Seal(nil, nonce, data, nil)
-	return append(append(salt, nonce...), cipherText...)
+	return append(append(salt, nonce...), cipherText...), nil
 }
 
 // decrypt data based on the argon2 hashing algorithm and xchacha20 cipher algorithm
 func (d *FileStore) decrypt(data, pass []byte) ([]byte, error) {
+	if len(data) < 40 {
+		return nil, errors.New("data has incorrect format")
+	}
 	salt := data[:16]
 	nonce := data[16:40]
 	data = data[40:]

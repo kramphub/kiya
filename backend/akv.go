@@ -32,10 +32,10 @@ func (b *AKV) List(ctx context.Context, _ *Profile) ([]Key, error) {
 			return nil, err
 		}
 
-		for _, v := range page.Secrets {
+		for _, each := range page.Secrets {
 			keys = append(keys, Key{
-				Name:      *v.Name,
-				CreatedAt: *v.Properties.CreatedOn,
+				Name:      *each.Name,
+				CreatedAt: *each.Properties.CreatedOn,
 				Info:      "creator: <Unknown>", // no owner
 				Owner:     "<Unknown>",
 			})
