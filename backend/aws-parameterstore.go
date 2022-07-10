@@ -122,3 +122,7 @@ func (s *AWSParameterStore) Close() error {
 	// noop
 	return nil
 }
+
+func (s *AWSParameterStore) SetParameter(key string, value interface{}) {
+	// noop
+}

@@ -6,6 +6,8 @@ Kiya is a tool to manage secrets stored in any of:
 - Google Secret Manager(GSM)
 - Google Bucket and encrypted by Google Key Management Service (KMS)
 - Amazon Web Services Parameter Store (SSM)
+- Azure Key Vault (AKV)
+- File on local disc
 
 ### Introduction
 
@@ -34,6 +36,16 @@ The bucket stores the encrypted secret value using the label as the storage key.
 #### AWS
 Kiya uses your AWS credentials to access the AWS Parameter Store (part of Systems Management). 
 All values are stored using the specified encryption key ID or the default key set for your AWS Account.
+
+#### AKV
+Kiya uses your authenticated default credentials. Make sure you have the Azure CLI installed.
+All secrets are stored with the default config provided in your vault.
+
+    az login
+
+#### File
+When using the file backend, make sure Kiya is allowed to read and write to the provided location.
+The file store is created with permission 0600
 
 ## Install
 
@@ -64,6 +76,14 @@ Use the backend `ssm` if you are storing keys in AWS Parameter Store as part of 
 		"backend": "gsm",
 		"projectID": "another-gcp-project"
 	},
+    "teamF3-on-file": {
+        "backend": "file",
+        "projectID": "my-file-name"
+    },
+    "teamF4-on-akv": {
+      "backend": "akv",
+      "vaultUrl": "https://<vault-name>.vault.azure.net"
+    },
 	"ag5": {
         "backend": "ssm",
         "location": "eu-central-1"
@@ -79,6 +99,22 @@ For Google Secret Manager based profiles a `projectID` is sufficient.
 You should define `location` for SSM (AWS Systems Management) based profiles ; its value is an AWS region.
 The `cryptoKey` is optional and must be set if you do not want to use the default key setup for your AWS Account.
 
+#### AKV
+You should define the `vaultUrl` for AKV (Azure Key Vault) based profiles ; its value is the URI used to identify a vault on Azure.
+
+#### File
+You should define `projectID` as it is used as a prefix for the file name.
+Optionally, you could provide `location` in order to store the file at a location of your choosing.
+
+If no `location` is provided, $HOME/<projectID.secrets.kiya will be used.
+
+When retrieving a password using **put** or **get**, provide the -pw my-master-password flag
+
+Storing or remembering the master password is the responsibility of the user. 
+You can use different master passwords for different keys.
+
+For the best security, it is best not to store your master password on the same device as your store.
+
 ### Store a password, _put_
 
 	kiya teamF1 put concourse/cd-pipeline mySecretPassword
@@ -93,6 +129,8 @@ confirmation prompt:
 
 _Note: this will put a secret in your command history; better use paste, see below._
 
+_Note2: when using a file based backend, provide the -pw my-master-password flag_
+
 ### Generate a password, _generate_
 
 	kiya teamF1 generate concourse/cd-pipeline 25
@@ -104,6 +142,8 @@ Generate a secret with length 25 store it as secret `concourse/cd-pipeline` and 
 	kiya teamF1 get concourse/cd-pipeline
 
 _Note: this will put a secret in your command history; better use copy, see below._
+
+_Note2: when using a file based backend, provide the -pw my-master-password flag_
 
 ### List labels of stored secrets, _list_
 
@@ -161,3 +201,7 @@ Run
 You do not have access to encrypted secrets from `some-bucket-name`.
 
 &copy; 2017 kramphub.com. Apache License v2.
+
+### 3. Error
+    message authentication failed
+Make sure to run **put** or **get** with the -pw flag containing a master password.

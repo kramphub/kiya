@@ -120,6 +120,10 @@ func (b *GSM) Close() error {
 	return b.client.Close()
 }
 
+func (b *GSM) SetParameter(key string, value interface{}) {
+	// noop
+}
+
 ///
 
 func (b *GSM) fullNameToName(fullName string) string {

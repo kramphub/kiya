@@ -187,3 +187,7 @@ func (b *KMS) storeSecret(p *Profile, key, encryptedValue string) error {
 	_, err := fmt.Fprintf(w, encryptedValue)
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
+
+func (b *KMS) SetParameter(key string, value interface{}) {
+	// noop
+}

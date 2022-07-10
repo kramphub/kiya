@@ -11,6 +11,7 @@ type Backend interface {
 	CheckExists(ctx context.Context, p *Profile, key string) (bool, error)
 	Put(ctx context.Context, p *Profile, key, value string) error
 	Delete(ctx context.Context, p *Profile, key string) error
+	SetParameter(key string, value interface{})
 	Close() error
 }
 
@@ -30,5 +31,6 @@ type Profile struct {
 	Keyring     string
 	CryptoKey   string
 	Bucket      string
+	VaultUrl    string
 	SecretRunes []rune
 }

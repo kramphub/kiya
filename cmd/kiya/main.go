@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"io/ioutil"
 	"log"
 	"os"
@@ -64,6 +66,12 @@ func main() {
 	case "put":
 		key := flag.Arg(2)
 		value := flag.Arg(3)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		if len(value) != 0 {
 			commandPutPasteGenerate(ctx, b, &target, "put", key, value, doPrompt)
 		} else {
@@ -78,6 +86,12 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
+		
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		commandPutPasteGenerate(ctx, b, &target, "paste", key, value, doPrompt)
 
 	case "generate":
@@ -102,12 +116,24 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		commandPutPasteGenerate(ctx, b, &target, "generate", key, secret, mustPrompt)
 		// make it available on the clipboard, ignore error
 		clipboard.WriteAll(secret)
 
 	case "copy":
 		key := flag.Arg(2)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
 		value, err := b.Get(ctx, &target, key)
 		if err != nil {
 			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
@@ -118,6 +144,11 @@ func main() {
 
 	case "get":
 		key := flag.Arg(2)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
 
 		bytes, err := b.Get(ctx, &target, key)
 		if err != nil {
@@ -151,6 +182,11 @@ func main() {
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)
 		}
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
 		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
 	default:
 		commandList(ctx, b, &target, flag.Arg(1))
@@ -169,7 +205,18 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		}
 
 		return backend.NewGSM(gsmClient), nil
-
+	case "akv":
+		cred, err := azidentity.NewDefaultAzureCredential(nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		client, err := azsecrets.NewClient(p.VaultUrl, cred, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return backend.NewAKV(client), nil
+	case "file":
+		return backend.NewFileStore(p.Location, p.ProjectID), nil
 	case "kms":
 		fallthrough
 	default:
@@ -178,7 +225,6 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		// Create the Bucket client
 		storageService, err := cloudstore.NewClient(ctx)
 		if err != nil {

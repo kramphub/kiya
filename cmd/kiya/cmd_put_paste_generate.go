@@ -16,7 +16,6 @@ func commandPutPasteGenerate(
 	command, key, value string,
 	mustPrompt bool,
 ) {
-
 	if exists, _ := b.CheckExists(ctx, target, key); exists {
 		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
 			log.Fatalln(command + " aborted")
