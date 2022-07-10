@@ -1,5 +1,10 @@
 # Changes
 
+### v1.11.0
+
+- Added support for Azure Key Vault (AKV)
+- Added support for File on local disc
+
 ### v1.10.1
 
 - fix aws listing (use recursive search)
