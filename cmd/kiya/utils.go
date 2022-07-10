@@ -49,6 +49,9 @@ func shouldPromptForPassword(b backend.Backend) bool {
 	}
 }
 func promptForPassword() []byte {
+
+	log.Print("[INFO]: Make sure you use a secure and strong master password.")
+
 	fmt.Println("Enter master password: ")
 	password, err := term.ReadPassword(syscall.Stdin)
 
@@ -59,7 +62,5 @@ func promptForPassword() []byte {
 	if len(password) == 0 {
 		log.Fatal("Password should have at least one character.")
 	}
-
-	log.Print("[WARNING]: Make sure you use a secure and strong master password.")
 	return password
 }
