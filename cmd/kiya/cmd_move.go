@@ -43,7 +43,8 @@ func move(
 		return tre.New(err, "get source key failed", "key", sourceKey)
 	}
 
-	if err := b.Put(ctx, target, targetKey, string(sourceValue)); err != nil {
+	exists, _ := b.CheckExists(ctx, target, targetKey)
+	if err := b.Put(ctx, target, targetKey, string(sourceValue), exists); err != nil {
 		return tre.New(err, "save key failed", targetKey)
 	}
 	// delete key from source

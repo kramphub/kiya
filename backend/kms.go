@@ -57,7 +57,7 @@ func (b *KMS) CheckExists(ctx context.Context, p *Profile, key string) (bool, er
 	return true, nil
 }
 
-func (b *KMS) Put(ctx context.Context, p *Profile, key, value string) error {
+func (b *KMS) Put(ctx context.Context, p *Profile, key, value string, overwrite bool) error {
 	encryptedValue, err := b.getEncryptedValue(p, value)
 	if err != nil {
 		return tre.New(err, "failed to fetch encrypted value", "key", key)

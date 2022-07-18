@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"golang.org/x/crypto/argon2"
-	"golang.org/x/crypto/chacha20poly1305"
 	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
 	"time"
+
+	"golang.org/x/crypto/argon2"
+	"golang.org/x/crypto/chacha20poly1305"
 )
 
 type FileStore struct {
@@ -80,7 +81,7 @@ func (f *FileStore) CheckExists(_ context.Context, _ *Profile, key string) (bool
 }
 
 // Put a new Key with encrypted password in the store. Put overwrites the entire store file with the updated store
-func (f *FileStore) Put(_ context.Context, _ *Profile, key, value string) error {
+func (f *FileStore) Put(_ context.Context, _ *Profile, key, value string, overwrite bool) error {
 	if err := f.createStoreIfNotExists(); err != nil {
 		return err
 	}

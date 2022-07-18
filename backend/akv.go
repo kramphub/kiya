@@ -2,8 +2,9 @@ package backend
 
 import (
 	"context"
-	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"time"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 )
 
 type AKV struct {
@@ -49,7 +50,7 @@ func (b *AKV) CheckExists(ctx context.Context, _ *Profile, key string) (bool, er
 	return err == nil, err
 }
 
-func (b *AKV) Put(ctx context.Context, _ *Profile, key, value string) error {
+func (b *AKV) Put(ctx context.Context, _ *Profile, key, value string, overwrite bool) error {
 	_, err := b.client.SetSecret(ctx, key, value, nil)
 	if err != nil {
 		return err

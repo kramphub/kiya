@@ -1,5 +1,9 @@
 # Changes
 
+### v1.11.1
+
+- Fixes overwrite of value in AWS
+
 ### v1.11.0
 
 - Added support for Azure Key Vault (AKV)
