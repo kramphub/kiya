@@ -75,7 +75,7 @@ func (b *GSM) CheckExists(ctx context.Context, p *Profile, key string) (bool, er
 	return err == nil, err
 }
 
-func (b *GSM) Put(ctx context.Context, p *Profile, key, value string) error {
+func (b *GSM) Put(ctx context.Context, p *Profile, key, value string, overwrite bool) error {
 	_, err := b.client.CreateSecret(ctx, &secretmanagerpb.CreateSecretRequest{
 		Parent:   fmt.Sprintf("projects/%s", p.ProjectID),
 		SecretId: key,

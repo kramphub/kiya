@@ -86,15 +86,17 @@ func (s *AWSParameterStore) CheckExists(ctx context.Context, p *Profile, key str
 }
 
 // Put write the parameter and its value using encryption ;either the default key or the one specified in the profile.
-func (s *AWSParameterStore) Put(ctx context.Context, p *Profile, key, value string) error {
+func (s *AWSParameterStore) Put(ctx context.Context, p *Profile, key, value string, overwrite bool) error {
 	input := &ssm.PutParameterInput{
-		Name:        aws.String(key),
-		Value:       aws.String(value),
-		Overwrite:   aws.Bool(false),
-		DataType:    aws.String("text"),
-		Description: aws.String(fmt.Sprintf("created by %s using kiya", os.Getenv("USER"))),
-		Tags:        []*ssm.Tag{{Key: aws.String("creator"), Value: aws.String(os.Getenv("USER"))}},
-		Type:        aws.String("SecureString"),
+		Name:      aws.String(key),
+		Value:     aws.String(value),
+		Overwrite: aws.Bool(overwrite),
+		DataType:  aws.String("text"),
+		Type:      aws.String("SecureString"),
+	}
+	if !overwrite {
+		input.Description = aws.String(fmt.Sprintf("created by %s using kiya", os.Getenv("USER")))
+		input.Tags = []*ssm.Tag{{Key: aws.String("creator"), Value: aws.String(os.Getenv("USER"))}}
 	}
 	// only if CryptoKey is set in the Profile then we set the KeyId
 	// which overrides the default key associated with the AWS account
