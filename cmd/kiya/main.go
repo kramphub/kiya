@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
 
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	cloudstore "cloud.google.com/go/storage"
@@ -86,7 +87,7 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
-		
+
 		if shouldPromptForPassword(b) {
 			pass := promptForPassword()
 			b.SetParameter("masterPassword", pass)
