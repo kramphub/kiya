@@ -9,6 +9,7 @@ import (
 	"golang.org/x/term"
 )
 
+// See also: https://github.com/golang/go/issues/11914
 func promptForPassword() []byte {
 
 	log.Print("[INFO]: Make sure you use a secure and strong master password.")
