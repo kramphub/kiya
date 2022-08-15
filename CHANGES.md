@@ -1,5 +1,9 @@
 # Changes
 
+### v1.11.2
+
+- Fixes reading password from Stdin on Windows
+
 ### v1.11.1
 
 - Fixes overwrite of value in AWS
