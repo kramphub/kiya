@@ -1,5 +1,9 @@
 # Changes
 
+### v1.11.3
+
+- Upgrade dependencies, fix breaking changes
+
 ### v1.11.2
 
 - Fixes reading password from Stdin on Windows
