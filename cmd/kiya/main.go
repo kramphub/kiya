@@ -212,9 +212,6 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 			log.Fatal(err)
 		}
 		client := azsecrets.NewClient(p.VaultUrl, cred, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
 		return backend.NewAKV(client), nil
 	case "file":
 		return backend.NewFileStore(p.Location, p.ProjectID), nil
