@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -63,4 +64,25 @@ func promptForPassword() []byte {
 		log.Fatal("Password should have at least one character.")
 	}
 	return password
+}
+
+func encodeToJson(v interface{}) []byte {
+	buf, err := json.Marshal(v)
+
+	if err != nil {
+		log.Fatalf("[FATAL] encode struct to JSON failed: %s", err.Error())
+	}
+
+	return buf
+}
+
+func decodeJson[T interface{}](data []byte) T {
+	var obj T
+	err := json.Unmarshal(data, &obj)
+
+	if err != nil {
+		log.Fatalf("[FATAL] decode JSON failed: %s", err.Error())
+	}
+
+	return obj
 }
