@@ -201,13 +201,16 @@ func main() {
 		}
 
 		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oPath)
+		if *oEncrypted {
+			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oPublicKeyLocation, *oKeyLocation)
+		}
 
 		if shouldPromptForPassword(b) {
 			pass := promptForPassword()
 			b.SetParameter("masterPassword", pass)
 		}
 
-		buf, err := commandBackup(ctx, b, target, filter)
+		backup, err := commandBackup(ctx, b, target, filter)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -217,21 +220,29 @@ func main() {
 			log.Fatalf("create file '%s' failed, %s", *oPath, err.Error())
 		}
 
-		if *oEncrypt {
-			if *oEncryptDecryptKey == "" {
-				log.Fatalln("missing '--key' parameter")
-			}
-
-			fmt.Println("Encryption is required")
-
-			buf, err = encrypt(buf, *oEncryptDecryptKey)
+		if *oEncrypted {
+			fmt.Printf("Backap will be encrypted. Public key path: %s, public key location: %s\n", oPublicKeyLocation, *oKeyLocation)
+			pub, err := getPublicKey(ctx, b, target, *oKeyLocation, *oPublicKeyLocation)
 			if err != nil {
-				log.Fatalf("encryption failed, %s", err.Error())
+				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
 			}
-			fmt.Println("Backup was encrypted")
+
+			backup.Secret = generateSecret()
+
+			buf, err := encryptFile(backup.Data, backup.SecretAsBytes())
+			if err != nil {
+				log.Fatalf("[FATAL] encrypt items failed, %s", err.Error())
+			}
+
+			backup.Data = buf
+			encryptedSecret, err := encryptSecret(backup.Secret, pub)
+			if err != nil {
+				log.Fatalf("[FATAL] encrypt secret failed, %s", err.Error())
+			}
+			backup.Secret = encryptedSecret
 		}
 
-		_, err = file.Write(buf)
+		_, err = file.Write([]byte(backup.String()))
 
 		if err != nil {
 			log.Fatalf("save file '%s' failed, %s", *oPath, err.Error())
@@ -244,14 +255,14 @@ func main() {
 			log.Fatalf("read '%s' failed, %s", *oPath, err.Error())
 		}
 
-		if *oEncryptDecryptKey != "" {
-			fmt.Println("Decrypt backup")
-			buf, err = decrypt(buf, *oEncryptDecryptKey)
-			if err != nil {
-				log.Fatalf("decryption failed: %s", err.Error())
-			}
-			fmt.Println("Backup was decrypted")
-		}
+		//if *oPublicKeyLocation != "" {
+		//	fmt.Println("Decrypt backup")
+		//	buf, err = decryptFile(buf, *oPublicKeyLocation)
+		//	if err != nil {
+		//		log.Fatalf("decryption failed: %s", err.Error())
+		//	}
+		//	fmt.Println("Backup was decrypted")
+		//}
 
 		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
 
@@ -264,8 +275,41 @@ func main() {
 
 		for k, v := range items {
 			fmt.Printf("Key: %s\n", k)
-			b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
+			err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
+			if err != nil {
+				log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+			}
 		}
+	case "keygen":
+		priv, pub, err := generateKeyPair()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		path := flag.Arg(2)
+		if path == "" {
+			path = "kiya_backupkey_rsa"
+		}
+
+		pubKeyStr := exportPublicKeyAsPEM(pub)
+		privKeyStr := exportPrivateKeyAsPEM(priv)
+
+		err = saveKeyToFile(pubKeyStr, fmt.Sprintf("%s_pub", path))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = saveKeyToFile(privKeyStr, path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Key '%s', '%s_pub' saved\n", path, path)
+		if err := clipboard.WriteAll(string(pubKeyStr)); err != nil {
+			log.Fatal(tre.New(err, "copy failed", err))
+		}
+		fmt.Println("Public key copied to clipboard")
+
 	default:
 		keys := commandList(ctx, b, &target, flag.Arg(1))
 		writeTable(keys, &target, flag.Arg(1))
