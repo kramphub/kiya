@@ -1,6 +1,6 @@
 module github.com/kramphub/kiya
 
-go 1.17
+go 1.19
 
 require (
 	cloud.google.com/go/secretmanager v1.5.0
@@ -11,7 +11,6 @@ require (
 	github.com/aws/aws-sdk-go v1.44.47
 	github.com/emicklei/tre v1.2.0
 	github.com/olekukonko/tablewriter v0.0.0-20170925234030-a7a4c189eb47
-	github.com/wagslane/go-password-validator v0.3.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/net v0.0.0-20220630215102-69896b714898
 	golang.org/x/oauth2 v0.0.0-20220630143837-2104d58473e0
