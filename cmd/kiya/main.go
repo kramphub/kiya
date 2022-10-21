@@ -202,7 +202,7 @@ func main() {
 
 		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oPath)
 		if *oEncrypted {
-			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oPublicKeyLocation, *oKeyLocation)
+			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oKey, *oKeyLocation)
 		}
 
 		if shouldPromptForPassword(b) {
@@ -221,8 +221,8 @@ func main() {
 		}
 
 		if *oEncrypted {
-			fmt.Printf("Backap will be encrypted. Public key path: %s, public key location: %s\n", oPublicKeyLocation, *oKeyLocation)
-			pub, err := getPublicKey(ctx, b, target, *oKeyLocation, *oPublicKeyLocation)
+			fmt.Printf("Backap will be encrypted. Public key path: %s, public key location: %s\n", *oKey, *oKeyLocation)
+			pub, err := getPublicKey(ctx, b, target, *oKeyLocation, *oKey)
 			if err != nil {
 				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
 			}
@@ -253,6 +253,36 @@ func main() {
 		buf, err := os.ReadFile(*oPath)
 		if err != nil {
 			log.Fatalf("read '%s' failed, %s", *oPath, err.Error())
+		}
+
+		backup := Backup{}
+		backup.FromString(string(buf))
+
+		if backup.Encrypted || *oEncrypted {
+			fmt.Println("Backup is encrypted.")
+
+			buf, err := os.ReadFile(*oKey)
+			if err != nil {
+				log.Fatalf("[FATAL] read private key '%s' failed, %s", *oKey, err.Error())
+			}
+
+			privKey := exportPrivateKeyFromPEMString(buf)
+			if err != nil {
+
+			}
+
+			secret, err := decryptSecret(backup.Secret, privKey)
+			if err != nil {
+				log.Fatalf("[FATAL] cannot decrypt secret, %s", err.Error())
+			}
+
+			buf, err = decryptFile(backup.Data, secret)
+			if err != nil {
+				log.Fatalf("[FATAL] decrypt items failed, %s", err.Error())
+			}
+
+			items := decodeJson[map[string][]byte](buf)
+			log.Printf("Restored %d item(s)\n", len(items))
 		}
 
 		//if *oPublicKeyLocation != "" {
