@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -171,7 +172,9 @@ func main() {
 	case "list":
 		// kiya [profile] list [|filter-term]
 		filter := flag.Arg(2)
-		commandList(ctx, b, &target, filter)
+
+		keys := commandList(ctx, b, &target, filter)
+		writeTable(keys, &target, filter)
 	case "template":
 		commandTemplate(ctx, b, &target, *oOutputFilename)
 	case "move":
@@ -189,8 +192,83 @@ func main() {
 			b.SetParameter("masterPassword", pass)
 		}
 		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
+
+	case "backup":
+		filter := flag.Arg(2)
+
+		if *oPath == "" {
+			log.Fatalln("--path not specified")
+		}
+
+		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oPath)
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
+		buf, err := commandBackup(ctx, b, target, filter)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		file, err := os.Create(*oPath)
+		if err != nil {
+			log.Fatalf("create file '%s' failed, %s", *oPath, err.Error())
+		}
+
+		if *oEncrypt {
+			if *oEncryptDecryptKey == "" {
+				log.Fatalln("missing '--key' parameter")
+			}
+
+			fmt.Println("Encryption is required")
+
+			buf, err = encrypt(buf, *oEncryptDecryptKey)
+			if err != nil {
+				log.Fatalf("encryption failed, %s", err.Error())
+			}
+			fmt.Println("Backup was encrypted")
+		}
+
+		_, err = file.Write(buf)
+
+		if err != nil {
+			log.Fatalf("save file '%s' failed, %s", *oPath, err.Error())
+		}
+	case "restore":
+		fmt.Printf("Restore profile '%s' from %s\n", profileName, *oPath)
+
+		buf, err := os.ReadFile(*oPath)
+		if err != nil {
+			log.Fatalf("read '%s' failed, %s", *oPath, err.Error())
+		}
+
+		if *oEncryptDecryptKey != "" {
+			fmt.Println("Decrypt backup")
+			buf, err = decrypt(buf, *oEncryptDecryptKey)
+			if err != nil {
+				log.Fatalf("decryption failed: %s", err.Error())
+			}
+			fmt.Println("Backup was decrypted")
+		}
+
+		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
+
+		items := make(map[string][]byte)
+		err = json.Unmarshal(buf, &items)
+		if err != nil {
+			log.Fatalf("decode '%s' failed, %s", *oPath, err.Error())
+		}
+		fmt.Printf("Total keys: %d\n", len(items))
+
+		for k, v := range items {
+			fmt.Printf("Key: %s\n", k)
+			b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
+		}
 	default:
-		commandList(ctx, b, &target, flag.Arg(1))
+		keys := commandList(ctx, b, &target, flag.Arg(1))
+		writeTable(keys, &target, flag.Arg(1))
 	}
 }
 
