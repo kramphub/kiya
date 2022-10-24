@@ -196,13 +196,13 @@ func main() {
 	case "backup":
 		filter := flag.Arg(2)
 
-		if *oPath == "" {
+		if *oBackupPath == "" {
 			log.Fatalln("--path not specified")
 		}
 
-		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oPath)
-		if *oEncrypted {
-			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oKey, *oKeyLocation)
+		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oBackupPath)
+		if *oEncryptBackup {
+			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oBackupKey, *oBackupKeyLocation)
 		}
 
 		if shouldPromptForPassword(b) {
@@ -215,14 +215,13 @@ func main() {
 			log.Fatalln(err.Error())
 		}
 
-		file, err := os.Create(*oPath)
+		file, err := os.Create(*oBackupPath)
 		if err != nil {
-			log.Fatalf("create file '%s' failed, %s", *oPath, err.Error())
+			log.Fatalf("create file '%s' failed, %s", *oBackupPath, err.Error())
 		}
 
-		if *oEncrypted {
-			fmt.Printf("Backap will be encrypted. Public key path: %s, public key location: %s\n", *oKey, *oKeyLocation)
-			pub, err := getPublicKey(ctx, b, target, *oKeyLocation, *oKey)
+		if *oEncryptBackup {
+			pub, err := getPublicKey(ctx, b, target, *oBackupKeyLocation, *oBackupKey)
 			if err != nil {
 				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
 			}
@@ -245,25 +244,25 @@ func main() {
 		_, err = file.Write([]byte(backup.String()))
 
 		if err != nil {
-			log.Fatalf("save file '%s' failed, %s", *oPath, err.Error())
+			log.Fatalf("save file '%s' failed, %s", *oBackupPath, err.Error())
 		}
 	case "restore":
-		fmt.Printf("Restore profile '%s' from %s\n", profileName, *oPath)
+		fmt.Printf("Restore profile '%s' from %s\n", profileName, *oBackupPath)
 
-		buf, err := os.ReadFile(*oPath)
+		buf, err := os.ReadFile(*oBackupPath)
 		if err != nil {
-			log.Fatalf("read '%s' failed, %s", *oPath, err.Error())
+			log.Fatalf("read '%s' failed, %s", *oBackupPath, err.Error())
 		}
 
 		backup := Backup{}
 		backup.FromString(string(buf))
 
-		if backup.Encrypted || *oEncrypted {
+		if backup.Encrypted || *oEncryptBackup {
 			fmt.Println("Backup is encrypted.")
 
-			buf, err := os.ReadFile(*oKey)
+			buf, err := os.ReadFile(*oBackupKey)
 			if err != nil {
-				log.Fatalf("[FATAL] read private key '%s' failed, %s", *oKey, err.Error())
+				log.Fatalf("[FATAL] read private key '%s' failed, %s", *oBackupKey, err.Error())
 			}
 
 			privKey := exportPrivateKeyFromPEMString(buf)
@@ -285,31 +284,22 @@ func main() {
 			log.Printf("Restored %d item(s)\n", len(items))
 		}
 
-		//if *oPublicKeyLocation != "" {
-		//	fmt.Println("Decrypt backup")
-		//	buf, err = decryptFile(buf, *oPublicKeyLocation)
-		//	if err != nil {
-		//		log.Fatalf("decryption failed: %s", err.Error())
-		//	}
-		//	fmt.Println("Backup was decrypted")
-		//}
-
 		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
 
 		items := make(map[string][]byte)
 		err = json.Unmarshal(buf, &items)
 		if err != nil {
-			log.Fatalf("decode '%s' failed, %s", *oPath, err.Error())
+			log.Fatalf("decode '%s' failed, %s", *oBackupPath, err.Error())
 		}
 		fmt.Printf("Total keys: %d\n", len(items))
 
-		for k, v := range items {
-			fmt.Printf("Key: %s\n", k)
-			err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
-			if err != nil {
-				log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
-			}
-		}
+		//for k, v := range items {
+		//	fmt.Printf("Key: %s\n", k)
+		//	err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
+		//	if err != nil {
+		//		log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+		//	}
+		//}
 	case "keygen":
 		priv, pub, err := generateKeyPair()
 		if err != nil {

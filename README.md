@@ -184,6 +184,65 @@ For accessing OS environment values:
 
     kiya teamF1 move bitbucket.org/johndoe teamF2
 
+### Backup
+
+| Flag                        | Type   | Description                                                  |
+| --------------------------- | ------ | ------------------------------------------------------------ |
+| `--encrypted` (optional)    | bool   |                                                              |
+| `--key-location` (optional) | string | `file` - local file system or `store` - one of supported service |
+| `--pub` (optional)          | string | Public key path                                              |
+| `--priv` (optional)         | string | Private key path                                             |
+| `--path` (optional)         | string | Backup file path                                             |
+
+You can backup all items or use a filter to backup specific keys:
+
+```shell
+kiya ag5 backup
+```
+
+with filter
+
+```shell
+kiya ag5 backup "/mysuperprefix-"
+```
+
+
+
+
+
+
+
+```shell
+kiya --encrypted --key-location store --pub /kiya/backup_public_key ag5 backup [filter]
+```
+
+**Without Encryption**
+
+This example just keys to file
+
+```shell
+kiya ag5 backup [filter]
+```
+
+**With encryption**
+
+```shell
+> go run . --encrypted --key-location store --pub /kiya/backup_key ag5 backup [filter]
+```
+
+### Keygen
+
+Generates a RSA kay pair and saves to file system, also copied public key to clipboard.
+
+```shell
+kiya teamF1 keygen [path]
+```
+
+if `path` if empty, will be use `./kiya_backupkey_rsa` file name to save private kay and `./kiya_backupkey_rsa_pub` for public key.
+
+
+
+
 ## Troubleshooting
 
 ### 1. Error
