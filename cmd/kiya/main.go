@@ -1,10 +1,9 @@
+//nolint:gomnd
 package main
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -125,8 +124,12 @@ func main() {
 		}
 
 		commandPutPasteGenerate(ctx, b, &target, "generate", key, secret, mustPrompt)
+
 		// make it available on the clipboard, ignore error
-		clipboard.WriteAll(secret)
+		err = clipboard.WriteAll(secret)
+		if err != nil {
+			log.Printf("[WARN] cannot copy public key to clipboard, %s", err.Error())
+		}
 
 	case "copy":
 		key := flag.Arg(2)
@@ -158,7 +161,7 @@ func main() {
 		}
 
 		if len(*oOutputFilename) > 0 {
-			if err := ioutil.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
+			if err := os.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
 				log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 			}
 			return
@@ -202,7 +205,7 @@ func main() {
 
 		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oBackupPath)
 		if *oEncryptBackup {
-			fmt.Printf("Backap will be encrypted. Public key path: '%s', public key location: '%s'\n", *oBackupKey, *oBackupKeyLocation)
+			fmt.Printf("Backup will be encrypted. Public key path: '%s', public key location: '%s'\n", *oBackupKey, *oBackupKeyStore)
 		}
 
 		if shouldPromptForPassword(b) {
@@ -221,14 +224,14 @@ func main() {
 		}
 
 		if *oEncryptBackup {
-			pub, err := getPublicKey(ctx, b, target, *oBackupKeyLocation, *oBackupKey)
+			pub, err := getPublicKey(ctx, b, target, *oBackupKeyStore, *oBackupKey)
 			if err != nil {
 				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
 			}
 
 			backup.Secret = generateSecret()
 
-			buf, err := encryptFile(backup.Data, backup.SecretAsBytes())
+			buf, err := encrypt(backup.Data, backup.SecretAsBytes())
 			if err != nil {
 				log.Fatalf("[FATAL] encrypt items failed, %s", err.Error())
 			}
@@ -256,6 +259,9 @@ func main() {
 
 		backup := Backup{}
 		backup.FromString(string(buf))
+		var items map[string][]byte
+
+		fmt.Printf("Backend '%s', restoring keys...", target.Backend)
 
 		if backup.Encrypted || *oEncryptBackup {
 			fmt.Println("Backup is encrypted.")
@@ -267,7 +273,7 @@ func main() {
 
 			privKey := exportPrivateKeyFromPEMString(buf)
 			if err != nil {
-
+				log.Fatalf("[FATAL] export private key '%s' failed, %s", *oBackupKey, err.Error())
 			}
 
 			secret, err := decryptSecret(backup.Secret, privKey)
@@ -275,31 +281,30 @@ func main() {
 				log.Fatalf("[FATAL] cannot decrypt secret, %s", err.Error())
 			}
 
-			buf, err = decryptFile(backup.Data, secret)
+			buf, err = decrypt(backup.Data, secret)
 			if err != nil {
 				log.Fatalf("[FATAL] decrypt items failed, %s", err.Error())
 			}
 
-			items := decodeJson[map[string][]byte](buf)
-			log.Printf("Restored %d item(s)\n", len(items))
+			fmt.Println("Backup decrypted, decode from JSON")
+			items = decodeJson[map[string][]byte](buf)
+		} else {
+			items = decodeJson[map[string][]byte](backup.Data)
 		}
 
-		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
+		fmt.Printf("\rBackend '%s', restoring %d key(s)\n", target.Backend, len(items))
 
-		items := make(map[string][]byte)
-		err = json.Unmarshal(buf, &items)
-		if err != nil {
-			log.Fatalf("decode '%s' failed, %s", *oBackupPath, err.Error())
+		if items == nil {
+			log.Fatalln("no items found")
 		}
-		fmt.Printf("Total keys: %d\n", len(items))
 
-		//for k, v := range items {
-		//	fmt.Printf("Key: %s\n", k)
-		//	err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
-		//	if err != nil {
-		//		log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
-		//	}
-		//}
+		for k, v := range items {
+			fmt.Printf("Key: %s=%s\n", k, string(v))
+			// err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
+			// if err != nil {
+			// log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+			// }
+		}
 	case "keygen":
 		priv, pub, err := generateKeyPair()
 		if err != nil {
@@ -325,7 +330,7 @@ func main() {
 		}
 
 		fmt.Printf("Key '%s', '%s_pub' saved\n", path, path)
-		if err := clipboard.WriteAll(string(pubKeyStr)); err != nil {
+		if err := clipboard.WriteAll(pubKeyStr); err != nil {
 			log.Fatal(tre.New(err, "copy failed", err))
 		}
 		fmt.Println("Public key copied to clipboard")
@@ -336,6 +341,7 @@ func main() {
 	}
 }
 
+// getBackend returns a backend based on the profile
 func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
 	switch p.Backend {
 	case "ssm":

@@ -1,3 +1,4 @@
+//nolint:gomnd
 package main
 
 import (
@@ -14,19 +15,20 @@ import (
 	"os"
 )
 
-// generateSecret returns generated secret as base64 string
+// generateSecret returns generated secret as base64 string.
 func generateSecret() string {
-	key := make([]byte, 64)
+	key := make([]byte, aes.BlockSize*4)
 
 	_, err := rand.Read(key)
 	if err != nil {
-		// handle error here
+		panic(err)
 	}
 
 	return base64.URLEncoding.EncodeToString(key)
 }
 
-func encryptFile(data []byte, secret []byte) ([]byte, error) {
+// encrypt data with secret.
+func encrypt(data []byte, secret []byte) ([]byte, error) {
 	key := sha256.Sum256(secret)
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
@@ -45,7 +47,8 @@ func encryptFile(data []byte, secret []byte) ([]byte, error) {
 	return ciphertext, nil
 }
 
-func decryptFile(data []byte, secret []byte) ([]byte, error) {
+// decrypt data with secret.
+func decrypt(data []byte, secret []byte) ([]byte, error) {
 	key := sha256.Sum256(secret)
 	block, err := aes.NewCipher(key[:])
 	if err != nil {
@@ -64,6 +67,7 @@ func decryptFile(data []byte, secret []byte) ([]byte, error) {
 	return data, nil
 }
 
+// encryptSecret encrypts secret with public key.
 func encryptSecret(secret string, publicKey *rsa.PublicKey) (encryptedSecret string, err error) {
 	buf, err := base64.URLEncoding.DecodeString(secret)
 	if err != nil {
@@ -78,6 +82,7 @@ func encryptSecret(secret string, publicKey *rsa.PublicKey) (encryptedSecret str
 	return base64.URLEncoding.EncodeToString(buf), nil
 }
 
+// decryptSecret decrypts secret with private key.
 func decryptSecret(secret string, privateKey *rsa.PrivateKey) ([]byte, error) {
 	secretBytes, err := base64.URLEncoding.DecodeString(secret)
 	if err != nil {
@@ -91,6 +96,7 @@ func decryptSecret(secret string, privateKey *rsa.PrivateKey) ([]byte, error) {
 	return buf, nil
 }
 
+// generateKeyPair generates a public/private key pair.
 func generateKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
@@ -99,7 +105,7 @@ func generateKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privateKey, &privateKey.PublicKey, nil
 }
 
-// exportPublicKeyAsPEM returns public key as a string in PEM format
+// exportPublicKeyAsPEM returns public key as a string in PEM format.
 func exportPublicKeyAsPEM(key *rsa.PublicKey) string {
 	pemStr := string(pem.EncodeToMemory(
 		&pem.Block{
@@ -110,7 +116,7 @@ func exportPublicKeyAsPEM(key *rsa.PublicKey) string {
 	return pemStr
 }
 
-// exportPrivateKeyAsPEM returns private key as a string in PEM format
+// exportPrivateKeyAsPEM returns private key as a string in PEM format.
 func exportPrivateKeyAsPEM(key *rsa.PrivateKey) string {
 	pemStr := string(pem.EncodeToMemory(
 		&pem.Block{
@@ -122,18 +128,21 @@ func exportPrivateKeyAsPEM(key *rsa.PrivateKey) string {
 
 }
 
+// exportPrivateKeyFromPEMString returns private key from PEM string.
 func exportPrivateKeyFromPEMString(pemStr []byte) *rsa.PrivateKey {
 	block, _ := pem.Decode(pemStr)
 	key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
 	return key
 }
 
+// exportPublicKeyFromPEMString returns public key from PEM string.
 func exportPublicKeyFromPEMString(pemStr []byte) *rsa.PublicKey {
 	block, _ := pem.Decode(pemStr)
 	key, _ := x509.ParsePKCS1PublicKey(block.Bytes)
 	return key
 }
 
+// saveKeyToFile saves key to file.
 func saveKeyToFile(keyPem, filename string) error {
 	pemBytes := []byte(keyPem)
 	return os.WriteFile(filename, pemBytes, 0400)

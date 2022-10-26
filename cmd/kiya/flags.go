@@ -12,8 +12,9 @@ var (
 	oCreatedAt      = flag.String("ca", "", "if not empty then use this formatted timestamp (RFC3339) as the creation date of the new secret")
 	oQuiet          = flag.Bool("quiet", false, "don't prompt for confirmation on destructive actions")
 
-	oEncryptBackup     = flag.Bool("encrypt-backup", true, "encryptFile backups")
-	oBackupKeyLocation = flag.String("backup-key-location", "file", "public key location ")
-	oBackupKey         = flag.String("backup-key", "./kiya_backupkey_rsa", "public key for encrypt backup")
-	oBackupPath        = flag.String("backup-path", "./kiya_backup", "location for backup/restore file")
+	// Backup flags
+	oEncryptBackup  = flag.Bool("encrypt-backup", false, "if true, the backup will be encrypted")
+	oBackupKeyStore = flag.String("backup-key-store", "file", "storage type for public key, 'store' or 'file'")
+	oBackupKey      = flag.String("backup-key", "./kiya_backupkey_rsa", "key to encrypt/decrypt the backup")
+	oBackupPath     = flag.String("backup-path", "./kiya_backup", "backup file path")
 )

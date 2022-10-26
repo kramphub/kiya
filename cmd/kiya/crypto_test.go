@@ -41,12 +41,12 @@ func TestEncryptFile(t *testing.T) {
 		Data:   []byte{0x0, 0xf, 0xff, 0x54, 0x43},
 	}
 
-	buf, err := encryptFile(bak.Data, bak.SecretAsBytes())
+	buf, err := encrypt(bak.Data, bak.SecretAsBytes())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	buf, err = decryptFile(buf, bak.SecretAsBytes())
+	buf, err = decrypt(buf, bak.SecretAsBytes())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,13 +60,13 @@ func TestEncryptFile(t *testing.T) {
 	}
 }
 
-func TestEncryptFileFull(t *testing.T) {
+func TestEncryptSecretAndFile(t *testing.T) {
 	bak := Backup{
 		Secret: generateSecret(),
 		Data:   []byte("my super secret text"),
 	}
 
-	encryptedDataBuf, err := encryptFile(bak.Data, bak.SecretAsBytes())
+	encryptedDataBuf, err := encrypt(bak.Data, bak.SecretAsBytes())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestEncryptFileFull(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dBuf, err := decryptFile(bak2.Data, decryptedSecret)
+	dBuf, err := decrypt(bak2.Data, decryptedSecret)
 	if err != nil {
 		t.Fatal(err)
 	}

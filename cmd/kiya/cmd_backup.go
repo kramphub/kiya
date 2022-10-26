@@ -6,11 +6,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/kramphub/kiya/backend"
 	"log"
 	"os"
+
+	"github.com/kramphub/kiya/backend"
 )
 
+// Backup is a backup of all keys in store.
 type Backup struct {
 	//Encrypted secret with public key and encoded as base64 string
 	Secret    string `json:"secret"`
@@ -18,11 +20,13 @@ type Backup struct {
 	Data      []byte `json:"data"`
 }
 
+// String returns a base64 String representation of the Backup.
 func (b *Backup) String() string {
 	buf := encodeToJson(b)
 	return base64.URLEncoding.EncodeToString(buf)
 }
 
+// FromString returns a Backup from a string representation.
 func (b *Backup) FromString(str string) {
 	buf, err := base64.URLEncoding.DecodeString(str)
 	if err != nil {
@@ -35,6 +39,7 @@ func (b *Backup) FromString(str string) {
 	}
 }
 
+// SecretAsBytes returns the secret as bytes.
 func (b *Backup) SecretAsBytes() []byte {
 	buf, err := base64.URLEncoding.DecodeString(b.Secret)
 	if err != nil {
@@ -44,6 +49,7 @@ func (b *Backup) SecretAsBytes() []byte {
 	return buf
 }
 
+// commandBackup creates a backup of all keys in store.
 func commandBackup(ctx context.Context, b backend.Backend, target backend.Profile, filter string) (*Backup, error) {
 	items, err := getItems(ctx, b, target, filter)
 	if err != nil {
@@ -77,6 +83,7 @@ func getItems(ctx context.Context, b backend.Backend, target backend.Profile, fi
 	return items, nil
 }
 
+// getPublicKey returns the public key from file or store.
 func getPublicKey(ctx context.Context, b backend.Backend, target backend.Profile, location, key string) (*rsa.PublicKey, error) {
 	switch location {
 	case "store":
@@ -98,6 +105,7 @@ func getPublicKey(ctx context.Context, b backend.Backend, target backend.Profile
 	}
 }
 
+// getPrivateKey returns the private key from file.
 func getPrivateKey(ctx context.Context, b backend.Backend, target backend.Profile, location, key string) (*rsa.PrivateKey, error) {
 	switch location {
 	case "store":

@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -14,7 +14,7 @@ import (
 )
 
 func readFromStdIn() string {
-	buffer, err := ioutil.ReadAll(os.Stdin)
+	buffer, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal("Error while reading from standard in", err)
 	}
@@ -27,7 +27,7 @@ func readFromStdIn() string {
 	return string(buffer)
 }
 
-// PromptForYes prompts for a yes or no in a CMD environment
+// PromptForYes prompts for a yes or no in a CMD environment.
 func promptForYes(message string) bool {
 
 	// Don't prompt for confirmation if the quiet flag is enabled
@@ -66,6 +66,7 @@ func promptForPassword() []byte {
 	return password
 }
 
+// encodeToJson encodes the given object to JSON.
 func encodeToJson(v interface{}) []byte {
 	buf, err := json.Marshal(v)
 
@@ -76,6 +77,7 @@ func encodeToJson(v interface{}) []byte {
 	return buf
 }
 
+// decodeJson decodes the given JSON to the given object.
 func decodeJson[T interface{}](data []byte) T {
 	var obj T
 	err := json.Unmarshal(data, &obj)
