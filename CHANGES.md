@@ -1,5 +1,9 @@
 # Changes
 
+### v1.12.0
+
+- Added backup option
+
 ### v1.11.2
 
 - Fixes reading password from Stdin on Windows

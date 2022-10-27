@@ -241,6 +241,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("[FATAL] encrypt secret failed, %s", err.Error())
 			}
+			backup.Encrypted = true
 			backup.Secret = encryptedSecret
 		}
 
@@ -261,7 +262,7 @@ func main() {
 		backup.FromString(string(buf))
 		var items map[string][]byte
 
-		fmt.Printf("Backend '%s', restoring keys...", target.Backend)
+		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
 
 		if backup.Encrypted || *oEncryptBackup {
 			fmt.Println("Backup is encrypted.")
@@ -299,12 +300,12 @@ func main() {
 		}
 
 		for k, v := range items {
-			fmt.Printf("Key: %s=%s\n", k, string(v))
-			// err := b.Put(ctx, &target, fmt.Sprintf("%s_restore", k), string(v), false)
-			// if err != nil {
-			// log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
-			// }
+			err := b.Put(ctx, &target, k, string(v), *oBackupRestoreOverwrite)
+			if err != nil {
+				log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+			}
 		}
+
 	case "keygen":
 		priv, pub, err := generateKeyPair()
 		if err != nil {
