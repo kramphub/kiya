@@ -4,6 +4,14 @@
 
 - Added backup option
 
+### v1.11.4
+
+- Fix an issue with azure client creation
+
+### v1.11.3
+
+- Upgrade dependencies, fix breaking changes
+
 ### v1.11.2
 
 - Fixes reading password from Stdin on Windows
