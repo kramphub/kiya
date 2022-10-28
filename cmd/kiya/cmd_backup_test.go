@@ -24,13 +24,8 @@ func TestBackup_String(t *testing.T) {
 		t.Fail()
 	}
 
-	if len(bak.Data) != len(bak2.Data) {
-		t.Fail()
-	}
-
-	if bak.Data[0] != bak2.Data[0] || bak.Data[1] != bak2.Data[1] || bak.Data[2] != bak2.Data[2] || bak.Data[3] != bak2.Data[3] {
-		t.Fail()
-	}
+	require.Len(t, len(bak.Data), len(bak2.Data))
+	require.ElementsMatch(t, bak.Data, bak2.Data, "elements not equal")
 }
 
 func TestBackupWithoutEncryption(t *testing.T) {
