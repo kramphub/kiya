@@ -214,7 +214,7 @@ For accessing OS environment values:
 | `--backup-restore-overwrite` | bool   | *Default: **false*** by default kiya will not override your keys, pass `true` at your own risk :) |
 |                              |        |                                                              |
 
-#### Backup without encryption
+### Backup without encryption
 
 Backup all keys without encryption:
 
@@ -230,7 +230,7 @@ kiya --backup-path /nasdrive/backup/mybackup teamF1 backup "/my_keys/"
 in this example the kiya backup only the keys containing `/my_keys/` and saves the backup to `/nasdrive/backup/mybackup`.
 
 
-#### Backup with encryption
+### Backup with encryption
 
 ```shell
 kiya --backup-path /nasdrive/backup/mybackup --encrypt-backup --backup-key "./path/to/public_key"  teamF! backup
@@ -242,13 +242,13 @@ kiya --backup-path /nasdrive/backup/mybackup --encrypt-backup --backup-key "./pa
 kiya --backup-path /nasdrive/backup/mybackup --encrypt-backup --backup-key-store "store" --backup-key "/path/to/public_key"  teamF! backup
 ```
 
-#### Restore non-encrypted backup
+### Restore non-encrypted backup
 
 ```shell
 kiya --backup-path /nasdrive/backup/mybackup teamF1 restore
 ```
 
-#### Restore encrypted backup
+### Restore encrypted backup
 
 ```shell
 kiya --backup-path /nasdrive/backup/mybackup --backup-key ./secure/path/backup_key ag5 restore
