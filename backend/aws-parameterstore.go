@@ -35,6 +35,7 @@ func (s *AWSParameterStore) Get(ctx context.Context, p *Profile, key string) ([]
 	if err != nil {
 		return []byte{}, err
 	}
+
 	return []byte(*output.Parameter.Value), nil
 }
 

@@ -1,9 +1,9 @@
+//nolint:gomnd
 package main
 
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
@@ -124,8 +124,12 @@ func main() {
 		}
 
 		commandPutPasteGenerate(ctx, b, &target, "generate", key, secret, mustPrompt)
+
 		// make it available on the clipboard, ignore error
-		clipboard.WriteAll(secret)
+		err = clipboard.WriteAll(secret)
+		if err != nil {
+			log.Printf("[WARN] cannot copy public key to clipboard, %s", err.Error())
+		}
 
 	case "copy":
 		key := flag.Arg(2)
@@ -157,7 +161,7 @@ func main() {
 		}
 
 		if len(*oOutputFilename) > 0 {
-			if err := ioutil.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
+			if err := os.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
 				log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
 			}
 			return
@@ -171,7 +175,9 @@ func main() {
 	case "list":
 		// kiya [profile] list [|filter-term]
 		filter := flag.Arg(2)
-		commandList(ctx, b, &target, filter)
+
+		keys := commandList(ctx, b, &target, filter)
+		writeTable(keys, &target, filter)
 	case "template":
 		commandTemplate(ctx, b, &target, *oOutputFilename)
 	case "move":
@@ -189,11 +195,154 @@ func main() {
 			b.SetParameter("masterPassword", pass)
 		}
 		commandMove(ctx, b, &sourceProfile, sourceKey, &targetProfile, targetKey)
+
+	case "backup":
+		filter := flag.Arg(2)
+
+		if *oBackupPath == "" {
+			log.Fatalln("--path not specified")
+		}
+
+		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oBackupPath)
+		if *oEncryptBackup {
+			fmt.Printf("Backup will be encrypted. Public key path: '%s', public key location: '%s'\n", *oBackupKey, *oBackupKeyStore)
+		}
+
+		if shouldPromptForPassword(b) {
+			pass := promptForPassword()
+			b.SetParameter("masterPassword", pass)
+		}
+
+		backup, err := commandBackup(ctx, b, target, filter)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		file, err := os.Create(*oBackupPath)
+		if err != nil {
+			log.Fatalf("create file '%s' failed, %s", *oBackupPath, err.Error())
+		}
+
+		if *oEncryptBackup {
+			pub, err := getPublicKey(ctx, b, target, *oBackupKeyStore, *oBackupKey)
+			if err != nil {
+				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
+			}
+
+			backup.Secret = generateSecret()
+
+			buf, err := encrypt(backup.Data, backup.SecretAsBytes())
+			if err != nil {
+				log.Fatalf("[FATAL] encrypt items failed, %s", err.Error())
+			}
+
+			backup.Data = buf
+			encryptedSecret, err := encryptSecret(backup.Secret, pub)
+			if err != nil {
+				log.Fatalf("[FATAL] encrypt secret failed, %s", err.Error())
+			}
+			backup.Encrypted = true
+			backup.Secret = encryptedSecret
+		}
+
+		_, err = file.Write([]byte(backup.String()))
+
+		if err != nil {
+			log.Fatalf("save file '%s' failed, %s", *oBackupPath, err.Error())
+		}
+	case "restore":
+		fmt.Printf("Restore profile '%s' from %s\n", profileName, *oBackupPath)
+
+		buf, err := os.ReadFile(*oBackupPath)
+		if err != nil {
+			log.Fatalf("read '%s' failed, %s", *oBackupPath, err.Error())
+		}
+
+		backup := Backup{}
+		backup.FromString(string(buf))
+		var items map[string][]byte
+
+		fmt.Printf("Backend '%s', restoring keys...\n", target.Backend)
+
+		if backup.Encrypted || *oEncryptBackup {
+			fmt.Println("Backup is encrypted.")
+
+			buf, err := os.ReadFile(*oBackupKey)
+			if err != nil {
+				log.Fatalf("[FATAL] read private key '%s' failed, %s", *oBackupKey, err.Error())
+			}
+
+			privKey := exportPrivateKeyFromPEMString(buf)
+			if err != nil {
+				log.Fatalf("[FATAL] export private key '%s' failed, %s", *oBackupKey, err.Error())
+			}
+
+			secret, err := decryptSecret(backup.Secret, privKey)
+			if err != nil {
+				log.Fatalf("[FATAL] cannot decrypt secret, %s", err.Error())
+			}
+
+			buf, err = decrypt(backup.Data, secret)
+			if err != nil {
+				log.Fatalf("[FATAL] decrypt items failed, %s", err.Error())
+			}
+
+			fmt.Println("Backup decrypted, decode from JSON")
+			items = decodeJson[map[string][]byte](buf)
+		} else {
+			items = decodeJson[map[string][]byte](backup.Data)
+		}
+
+		fmt.Printf("\rBackend '%s', restoring %d key(s)\n", target.Backend, len(items))
+
+		if items == nil {
+			log.Fatalln("no items found")
+		}
+
+		for k, v := range items {
+			err := b.Put(ctx, &target, k, string(v), *oBackupRestoreOverwrite)
+			if err != nil {
+				log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+			}
+		}
+
+	case "keygen":
+		priv, pub, err := generateKeyPair()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		path := flag.Arg(2)
+		if path == "" {
+			path = "kiya_backupkey_rsa"
+		}
+
+		pubKeyStr := exportPublicKeyAsPEM(pub)
+		privKeyStr := exportPrivateKeyAsPEM(priv)
+
+		err = saveKeyToFile(pubKeyStr, fmt.Sprintf("%s_pub", path))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		err = saveKeyToFile(privKeyStr, path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Printf("Key '%s', '%s_pub' saved\n", path, path)
+		if err := clipboard.WriteAll(pubKeyStr); err != nil {
+			log.Fatal(tre.New(err, "copy failed", err))
+		}
+		fmt.Println("Public key copied to clipboard")
+
 	default:
-		commandList(ctx, b, &target, flag.Arg(1))
+		keys := commandList(ctx, b, &target, flag.Arg(1))
+		writeTable(keys, &target, flag.Arg(1))
 	}
 }
 
+// getBackend returns a backend based on the profile
 func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error) {
 	switch p.Backend {
 	case "ssm":

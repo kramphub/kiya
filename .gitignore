@@ -2,3 +2,4 @@ release
 .idea
 .vscode
 vendor
+cmd/kiya/assets/

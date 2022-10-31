@@ -3,24 +3,41 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/olekukonko/tablewriter"
 	"log"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/kramphub/kiya/backend"
-	"github.com/olekukonko/tablewriter"
 )
 
 // commandList lists keys in a specific profile
-func commandList(ctx context.Context, b backend.Backend, target *backend.Profile, filter string) {
+func commandList(ctx context.Context, b backend.Backend, target *backend.Profile, filter string) []backend.Key {
 	keys, err := b.List(ctx, target)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var data [][]string
+	filteredKeys := make([]backend.Key, 0)
+	for _, k := range keys {
+		if len(filter) > 0 {
+			if !caseInsensitiveContains(k.Name, filter) {
+				continue
+			}
+		}
+
+		filteredKeys = append(filteredKeys, k)
+	}
+
+	return filteredKeys
+}
+
+// writeTable writes a human-readable table with parameters info.
+func writeTable(keys []backend.Key, target *backend.Profile, filter string) {
 	filteredCount := 0
+
+	data := make([][]string, 0)
 
 	for _, k := range keys {
 		if len(filter) > 0 {

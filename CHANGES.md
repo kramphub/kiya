@@ -1,5 +1,9 @@
 # Changes
 
+### v1.12.0
+
+- Added backup option
+
 ### v1.11.4
 
 - Fix an issue with azure client creation
