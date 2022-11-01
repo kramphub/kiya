@@ -1,5 +1,9 @@
 # Changes
 
+### v1.12.1
+
+- Fixed AKV client
+
 ### v1.12.0
 
 - Added backup option
