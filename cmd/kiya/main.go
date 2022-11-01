@@ -360,7 +360,10 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		if err != nil {
 			log.Fatal(err)
 		}
-		client := azsecrets.NewClient(p.VaultUrl, cred, nil)
+		client, err := azsecrets.NewClient(p.VaultUrl, cred, nil)
+		if err != nil {
+			log.Fatalf("failed to create client [%v]", err)
+		}
 		return backend.NewAKV(client), nil
 	case "file":
 		return backend.NewFileStore(p.Location, p.ProjectID), nil
