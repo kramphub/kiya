@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path"
@@ -118,7 +117,7 @@ func (f *FileStore) Put(_ context.Context, _ *Profile, key, value string, overwr
 	if err != nil {
 		return err
 	}
-	if err := ioutil.WriteFile(f.storeLocation, data, 0600); err != nil {
+	if err := os.WriteFile(f.storeLocation, data, 0600); err != nil {
 		return err
 	}
 	return nil
@@ -145,7 +144,7 @@ func (f *FileStore) Delete(_ context.Context, _ *Profile, key string) error {
 			return err
 		}
 	}
-	if err := ioutil.WriteFile(f.storeLocation, data, 0600); err != nil {
+	if err := os.WriteFile(f.storeLocation, data, 0600); err != nil {
 		return err
 	}
 
@@ -201,7 +200,7 @@ func (f *FileStore) getStore() ([]FileStoreEntry, error) {
 	if err := f.createStoreIfNotExists(); err != nil {
 		return nil, err
 	}
-	data, err := ioutil.ReadFile(f.storeLocation)
+	data, err := os.ReadFile(f.storeLocation)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +218,7 @@ func (f *FileStore) getStore() ([]FileStoreEntry, error) {
 func (f *FileStore) createStoreIfNotExists() error {
 	if _, err := os.Stat(f.storeLocation); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			err = ioutil.WriteFile(f.storeLocation, []byte(""), 0600)
+			err = os.WriteFile(f.storeLocation, []byte(""), 0600)
 			if err != nil {
 				return err
 			}

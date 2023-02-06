@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 
 	"cloud.google.com/go/storage"
@@ -49,7 +49,7 @@ func (b *KMS) CheckExists(ctx context.Context, p *Profile, key string) (bool, er
 	}
 	defer r.Close()
 
-	_, err = ioutil.ReadAll(r)
+	_, err = io.ReadAll(r)
 	if err != nil {
 		return false, tre.New(err, "reading encrypted value failed", "profile", p.Label, "key", key)
 	}
@@ -123,7 +123,7 @@ func (b *KMS) loadSecret(p *Profile, key string) ([]byte, error) {
 	}
 	defer r.Close()
 
-	data, err := ioutil.ReadAll(r)
+	data, err := io.ReadAll(r)
 	if err != nil {
 		return nil, tre.New(err, "reading encrypted value failed", "profile", p.Label, "key", key)
 	}
@@ -184,7 +184,7 @@ func (b *KMS) storeSecret(p *Profile, key, encryptedValue string) error {
 	w := bucket.Object(key).NewWriter(context.Background())
 	defer w.Close()
 
-	_, err := fmt.Fprintf(w, encryptedValue)
+	_, err := fmt.Fprint(w, encryptedValue)
 	return tre.New(err, "writing encrypted value failed", "encryptedValue", encryptedValue)
 }
 

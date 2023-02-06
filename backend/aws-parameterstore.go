@@ -18,10 +18,13 @@ type AWSParameterStore struct {
 
 // NewAWSParameterStore returns a new AWSParameterStore with an initialized AWS SSM client.
 func NewAWSParameterStore(ctx context.Context, p *Profile) (*AWSParameterStore, error) {
-	sess := session.New(&aws.Config{
+	sess, err := session.NewSession(&aws.Config{
 		Region:     aws.String(p.Location),
 		MaxRetries: aws.Int(2),
 	})
+	if err != nil {
+		return nil, err
+	}
 	return &AWSParameterStore{client: ssm.New(sess), kmsKeyID: p.CryptoKey}, nil
 }
 

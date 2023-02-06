@@ -2,9 +2,11 @@ package backend
 
 import (
 	"context"
+
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
-	"time"
 )
+
+const latestKeyVersion = ""
 
 type AKV struct {
 	client *azsecrets.Client
@@ -15,7 +17,7 @@ func NewAKV(client *azsecrets.Client) *AKV {
 }
 
 func (b *AKV) Get(ctx context.Context, _ *Profile, key string) ([]byte, error) {
-	resp, err := b.client.GetSecret(ctx, key, nil)
+	resp, err := b.client.GetSecret(ctx, key, latestKeyVersion, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +25,7 @@ func (b *AKV) Get(ctx context.Context, _ *Profile, key string) ([]byte, error) {
 }
 
 func (b *AKV) List(ctx context.Context, _ *Profile) ([]Key, error) {
-	pager := b.client.ListPropertiesOfSecrets(nil)
+	pager := b.client.NewListSecretsPager(nil)
 
 	var keys []Key
 	for pager.More() {
@@ -32,10 +34,10 @@ func (b *AKV) List(ctx context.Context, _ *Profile) ([]Key, error) {
 			return nil, err
 		}
 
-		for _, v := range page.Secrets {
+		for _, v := range page.Value {
 			keys = append(keys, Key{
-				Name:      *v.Name,
-				CreatedAt: *v.Properties.CreatedOn,
+				Name:      v.ID.Name(),
+				CreatedAt: *v.Attributes.Created,
 				Info:      "creator: <Unknown>", // no owner
 				Owner:     "<Unknown>",
 			})
@@ -45,12 +47,12 @@ func (b *AKV) List(ctx context.Context, _ *Profile) ([]Key, error) {
 }
 
 func (b *AKV) CheckExists(ctx context.Context, _ *Profile, key string) (bool, error) {
-	_, err := b.client.GetSecret(ctx, key, nil)
+	_, err := b.client.GetSecret(ctx, key, latestKeyVersion, nil)
 	return err == nil, err
 }
 
 func (b *AKV) Put(ctx context.Context, _ *Profile, key, value string, overwrite bool) error {
-	_, err := b.client.SetSecret(ctx, key, value, nil)
+	_, err := b.client.SetSecret(ctx, key, azsecrets.SetSecretParameters{Value: &value}, nil)
 	if err != nil {
 		return err
 	}
@@ -58,11 +60,7 @@ func (b *AKV) Put(ctx context.Context, _ *Profile, key, value string, overwrite 
 }
 
 func (b *AKV) Delete(ctx context.Context, _ *Profile, key string) error {
-	res, err := b.client.BeginDeleteSecret(ctx, key, nil)
-	if err != nil {
-		return err
-	}
-	_, err = res.PollUntilDone(ctx, time.Second)
+	_, err := b.client.DeleteSecret(ctx, key, nil)
 	if err != nil {
 		return err
 	}
