@@ -20,6 +20,7 @@ import (
 	"github.com/kramphub/kiya/backend"
 	"golang.org/x/net/context"
 	"google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/option"
 )
 
 var version = "build-" + time.Now().String()
@@ -371,7 +372,7 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		fallthrough
 	default:
 		// Create the KMS client
-		kmsService, err := cloudkms.New(kiya.NewAuthenticatedClient(*oAuthLocation))
+		kmsService, err := cloudkms.NewService(ctx, option.WithHTTPClient(kiya.NewAuthenticatedClient(*oAuthLocation)))
 		if err != nil {
 			log.Fatal(err)
 		}

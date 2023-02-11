@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/olekukonko/tablewriter"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/olekukonko/tablewriter"
 
 	"github.com/kramphub/kiya/backend"
 )

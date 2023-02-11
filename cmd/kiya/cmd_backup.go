@@ -104,25 +104,3 @@ func getPublicKey(ctx context.Context, b backend.Backend, target backend.Profile
 		return exportPublicKeyFromPEMString(buf), nil
 	}
 }
-
-// getPrivateKey returns the private key from file.
-func getPrivateKey(ctx context.Context, b backend.Backend, target backend.Profile, location, key string) (*rsa.PrivateKey, error) {
-	switch location {
-	case "store":
-		buf, err := b.Get(ctx, &target, key)
-		if err != nil {
-			return nil, fmt.Errorf("get private key '%s' failed, %w", key, err)
-		}
-
-		return exportPrivateKeyFromPEMString(buf), nil
-	case "file":
-		fallthrough
-	default:
-		buf, err := os.ReadFile(key)
-		if err != nil {
-			return nil, fmt.Errorf("read private file '%s' failed, %w", key, err)
-		}
-
-		return exportPrivateKeyFromPEMString(buf), nil
-	}
-}

@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"testing/fstest"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestBackup_String(t *testing.T) {
@@ -24,7 +25,7 @@ func TestBackup_String(t *testing.T) {
 		t.Fail()
 	}
 
-	require.Len(t, len(bak.Data), len(bak2.Data))
+	require.Len(t, bak.Data, len(bak2.Data))
 	require.ElementsMatch(t, bak.Data, bak2.Data, "elements not equal")
 }
 

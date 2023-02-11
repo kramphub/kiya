@@ -1,5 +1,9 @@
 # Changes
 
+### v1.12.3
+
+- Dependency upgrades and fixing changes
+
 ### v1.12.2
 
 - Fixed AKV client
