@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
@@ -18,8 +19,13 @@ type AWSParameterStore struct {
 
 // NewAWSParameterStore returns a new AWSParameterStore with an initialized AWS SSM client.
 func NewAWSParameterStore(ctx context.Context, p *Profile) (*AWSParameterStore, error) {
+	// Load the Shared AWS Configuration (~/.aws/config)
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return nil, err
+	}
 	return &AWSParameterStore{
-		client:   ssm.New(ssm.Options{Region: p.Location, RetryMaxAttempts: 2}),
+		client:   ssm.NewFromConfig(cfg),
 		kmsKeyID: p.CryptoKey}, nil
 }
 
