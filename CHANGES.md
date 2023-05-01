@@ -1,5 +1,13 @@
 # Changes
 
+### v1.12.5
+
+- Security upgrades from Dependabot
+
+### v1.12.4
+
+- Use new AWS SDK v2
+
 ### v1.12.3
 
 - Dependency upgrades and fixing changes
