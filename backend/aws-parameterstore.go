@@ -5,27 +5,28 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
 
 // AWSParameterStore implements Backend for AWS Parameter Store service.
 type AWSParameterStore struct {
-	client   *ssm.SSM
+	client   *ssm.Client
 	kmsKeyID string
 }
 
 // NewAWSParameterStore returns a new AWSParameterStore with an initialized AWS SSM client.
 func NewAWSParameterStore(ctx context.Context, p *Profile) (*AWSParameterStore, error) {
-	sess, err := session.NewSession(&aws.Config{
-		Region:     aws.String(p.Location),
-		MaxRetries: aws.Int(2),
-	})
+	// Load the Shared AWS Configuration (~/.aws/config)
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return &AWSParameterStore{client: ssm.New(sess), kmsKeyID: p.CryptoKey}, nil
+	return &AWSParameterStore{
+		client:   ssm.NewFromConfig(cfg),
+		kmsKeyID: p.CryptoKey}, nil
 }
 
 // Get returns the decrypted value for a parameter by key.
@@ -34,7 +35,7 @@ func (s *AWSParameterStore) Get(ctx context.Context, p *Profile, key string) ([]
 		Name:           aws.String(key),
 		WithDecryption: aws.Bool(true),
 	}
-	output, err := s.client.GetParameter(input)
+	output, err := s.client.GetParameter(ctx, input)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -46,11 +47,11 @@ func (s *AWSParameterStore) Get(ctx context.Context, p *Profile, key string) ([]
 func (s *AWSParameterStore) List(ctx context.Context, p *Profile) (list []Key, err error) {
 	input := &ssm.GetParametersByPathInput{
 		Path:       aws.String("/"),
-		MaxResults: aws.Int64(10), // is the documented maximum
+		MaxResults: aws.Int32(10), // is the documented maximum
 		Recursive:  aws.Bool(true),
 	}
 	for {
-		output, err := s.client.GetParametersByPath(input)
+		output, err := s.client.GetParametersByPath(ctx, input)
 		if err != nil {
 			return []Key{}, err
 		}
@@ -58,7 +59,7 @@ func (s *AWSParameterStore) List(ctx context.Context, p *Profile) (list []Key, e
 			list = append(list, Key{
 				Name:      *each.Name,
 				CreatedAt: *each.LastModifiedDate,
-				Info:      fmt.Sprintf("type: %v datatype: %v version: %v", *each.Type, *each.DataType, *each.Version),
+				Info:      fmt.Sprintf("type: %s datatype: %s version: %d", *each.DataType, *each.DataType, each.Version),
 				Owner:     "<Unknown>",
 			})
 		}
@@ -77,10 +78,7 @@ func (s *AWSParameterStore) CheckExists(ctx context.Context, p *Profile, key str
 		Name:           aws.String(key),
 		WithDecryption: aws.Bool(false), // No decryption is needed
 	}
-	_, err := s.client.GetParameter(input)
-	if _, ok := err.(*ssm.ParameterNotFound); ok {
-		return false, nil
-	}
+	_, err := s.client.GetParameter(ctx, input)
 	// other error?
 	if err != nil {
 		return false, err
@@ -96,18 +94,18 @@ func (s *AWSParameterStore) Put(ctx context.Context, p *Profile, key, value stri
 		Value:     aws.String(value),
 		Overwrite: aws.Bool(overwrite),
 		DataType:  aws.String("text"),
-		Type:      aws.String("SecureString"),
+		Type:      types.ParameterTypeSecureString,
 	}
 	if !overwrite {
 		input.Description = aws.String(fmt.Sprintf("created by %s using kiya", os.Getenv("USER")))
-		input.Tags = []*ssm.Tag{{Key: aws.String("creator"), Value: aws.String(os.Getenv("USER"))}}
+		input.Tags = []types.Tag{{Key: aws.String("creator"), Value: aws.String(os.Getenv("USER"))}}
 	}
 	// only if CryptoKey is set in the Profile then we set the KeyId
 	// which overrides the default key associated with the AWS account
 	if p.CryptoKey != "" {
 		input.KeyId = aws.String(s.kmsKeyID)
 	}
-	_, err := s.client.PutParameter(input)
+	_, err := s.client.PutParameter(ctx, input)
 	if err != nil {
 		return err
 	}
@@ -119,7 +117,7 @@ func (s *AWSParameterStore) Delete(ctx context.Context, p *Profile, key string) 
 	input := &ssm.DeleteParameterInput{
 		Name: aws.String(key),
 	}
-	_, err := s.client.DeleteParameter(input)
+	_, err := s.client.DeleteParameter(ctx, input)
 	return err
 }
 
