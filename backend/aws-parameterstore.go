@@ -20,7 +20,7 @@ type AWSParameterStore struct {
 // NewAWSParameterStore returns a new AWSParameterStore with an initialized AWS SSM client.
 func NewAWSParameterStore(ctx context.Context, p *Profile) (*AWSParameterStore, error) {
 	// Load the Shared AWS Configuration (~/.aws/config)
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -79,9 +79,6 @@ func (s *AWSParameterStore) CheckExists(ctx context.Context, p *Profile, key str
 		WithDecryption: aws.Bool(false), // No decryption is needed
 	}
 	_, err := s.client.GetParameter(ctx, input)
-	// if _, ok := err.(*ssm.); ok {
-	// 	return false, nil
-	// }
 	// other error?
 	if err != nil {
 		return false, err
