@@ -2,14 +2,16 @@ name: Go
 
 on:
   push:
-    branches: [$default-branch]
+    branches:
+      - master
     paths-ignore:
       - README.md
       - CHANGES.md
       - .github/**
       - .gitignore
   pull_request:
-    branches: [$default-branch]
+    branches:
+      - master
 
 jobs:
   build:
