@@ -1,0 +1,31 @@
+name: Go
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - README.md
+      - CHANGES.md
+      - .github/**
+      - .gitignore
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: "1.19"
+
+      - name: Build
+        run: go build -v ./...
+
+      - name: Test
+        run: go test -v ./...
