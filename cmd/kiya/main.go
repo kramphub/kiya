@@ -134,19 +134,7 @@ func main() {
 
 	case "copy":
 		key := flag.Arg(2)
-
-		if shouldPromptForPassword(b) {
-			pass := promptForPassword()
-			b.SetParameter("masterPassword", pass)
-		}
-
-		value, err := b.Get(ctx, &target, key)
-		if err != nil {
-			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
-		}
-		if err := clipboard.WriteAll(string(value)); err != nil {
-			log.Fatal(tre.New(err, "copy failed", "key", key, "err", err))
-		}
+		copySecretToClipboard(ctx, b, target, key)
 
 	case "get":
 		key := flag.Arg(2)
@@ -175,10 +163,8 @@ func main() {
 		commandDelete(ctx, b, &target, key)
 	case "list":
 		// kiya [profile] list [|filter-term]
-		filter := flag.Arg(2)
+		listMatchingKeys(ctx, b, target, flag.Arg(2))
 
-		keys := commandList(ctx, b, &target, filter)
-		writeTable(keys, &target, filter)
 	case "template":
 		commandTemplate(ctx, b, &target, *oOutputFilename)
 	case "move":
@@ -338,8 +324,7 @@ func main() {
 		fmt.Println("Public key copied to clipboard")
 
 	default:
-		keys := commandList(ctx, b, &target, flag.Arg(1))
-		writeTable(keys, &target, flag.Arg(1))
+		listMatchingKeys(ctx, b, target, flag.Arg(1))
 	}
 }
 
@@ -383,5 +368,30 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		}
 
 		return backend.NewKMS(kmsService, storageService), nil
+	}
+}
+
+func copySecretToClipboard(ctx context.Context, be backend.Backend, target backend.Profile, key string) {
+	if shouldPromptForPassword(be) {
+		pass := promptForPassword()
+		be.SetParameter("masterPassword", pass)
+	}
+	value, err := be.Get(ctx, &target, key)
+	if err != nil {
+		log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+	}
+	if err := clipboard.WriteAll(string(value)); err != nil {
+		log.Fatal(tre.New(err, "copy failed", "key", key, "err", err))
+	}
+}
+
+func listMatchingKeys(ctx context.Context, be backend.Backend, target backend.Profile, filter string) {
+	keys := commandList(ctx, be, &target, filter)
+	writeTable(keys, &target, filter)
+	// if there is only one match and AutoCopy is enabled
+	// then copy the secret to clipboard
+	if len(keys) == 1 && target.AutoCopyEnabled {
+		copySecretToClipboard(ctx, be, target, keys[0].Name)
+		fmt.Println("... copied secret to clipboard.")
 	}
 }
