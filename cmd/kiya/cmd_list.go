@@ -48,7 +48,7 @@ func writeTable(keys []backend.Key, target *backend.Profile, filter string) {
 			}
 		}
 		cmd := fmt.Sprintf("kiya %s copy %s", target.Label, k.Name)
-		if target.PromptForCommandLine {
+		if target.PromptForSecretLine {
 			cmd = fmt.Sprintf("%d kiya %s copy %s", i+1, target.Label, k.Name)
 		}
 		data = append(data, []string{cmd, k.CreatedAt.Format(time.RFC822), k.Info})
