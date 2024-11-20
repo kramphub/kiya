@@ -410,6 +410,6 @@ func listMatchingKeys(ctx context.Context, be backend.Backend, target backend.Pr
 			return
 		}
 		copySecretToClipboard(ctx, be, target, keys[n-1].Name)
-		fmt.Printf("... copied secret [%s] to clipboard.\n", keys[0].Name)
+		fmt.Printf("... copied secret [%s] to clipboard.\n", keys[n-1].Name)
 	}
 }
