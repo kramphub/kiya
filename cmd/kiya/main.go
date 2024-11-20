@@ -396,6 +396,7 @@ func listMatchingKeys(ctx context.Context, be backend.Backend, target backend.Pr
 	if len(keys) == 1 && target.AutoCopyEnabled {
 		copySecretToClipboard(ctx, be, target, keys[0].Name)
 		fmt.Printf("... copied secret [%s] to clipboard.\n", keys[0].Name)
+		return
 	}
 	// more than one match
 	if target.PromptForSecretLine {
