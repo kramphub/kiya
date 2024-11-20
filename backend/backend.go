@@ -24,14 +24,15 @@ type Key struct {
 
 // Profile describes a single profile in a .kiya configuration
 type Profile struct {
-	Backend         string
-	Label           string
-	ProjectID       string
-	Location        string
-	Keyring         string
-	CryptoKey       string
-	Bucket          string
-	VaultUrl        string
-	SecretRunes     []rune
-	AutoCopyEnabled bool // if true then the secret of a single list result will be copied to clipboard
+	Backend              string
+	Label                string
+	ProjectID            string
+	Location             string
+	Keyring              string
+	CryptoKey            string
+	Bucket               string
+	VaultUrl             string
+	SecretRunes          []rune
+	AutoCopyEnabled      bool `json:"autoCopyEnabled"`      // if true then the secret of a single list result will be copied to clipboard
+	PromptForCommandLine bool `json:"promptForCommandLine"` // if true then you must enter a number to run the command on that line
 }
