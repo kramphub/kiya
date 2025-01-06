@@ -40,7 +40,7 @@ func main() {
 	}
 	kiya.LoadConfiguration(*oConfigFilename)
 	if len(flag.Args()) < 2 {
-		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate] [|parent/key] [|value] [|template-filename] [|secret-length]")
+		fmt.Println("kiya [flags] [profile] [get|put|delete|list|template|copy|paste|move|generate|analyse] [|parent/key] [|value] [|template-filename] [|secret-length]")
 		fmt.Println("    if value, template-filename or secret length is needed, but missing, it is read from stdin")
 		flag.PrintDefaults()
 		os.Exit(0)
@@ -322,6 +322,9 @@ func main() {
 			log.Fatal(tre.New(err, "copy failed", err))
 		}
 		fmt.Println("Public key copied to clipboard")
+
+	case "analyse":
+		commandAnalyse(ctx, b, &target)
 
 	default:
 		listMatchingKeys(ctx, b, target, flag.Arg(1))
