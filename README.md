@@ -270,7 +270,11 @@ e.g. print it out on paper and put it in a physical safe :)).
 
 #### Auto copy to clipboard
 
-The `list` (which is the default command if no command is given) command will show a table of matches based on the given command line argument. If that list contains a single match and your profile has `autocopyenabled` set to true then the secret will be copied to the clipboard automatically.
+The `list` (which is the default command if no command is given) command will show a table of matches based on the given command line argument. If that list contains a single match and your profile has `autoCopyEnabled` set to true then the secret will be copied to the clipboard automatically.
+
+### Prompt for command by line number
+
+The `list` (which is the default command if no command is given) command will show a table of matches based on the given command line argument. If your profile has `promptForSecretLine` set to true then each line has a number and the tool will prompt for the number to execute the line.
 
 ### Limitations
 

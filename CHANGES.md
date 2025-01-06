@@ -1,5 +1,9 @@
 # Changes
 
+### v1.14.0
+
+- Add PromptForCommandLine field to profile.
+
 ### v1.13.0
 
 - Add AutoCopyEnabled field to profile.

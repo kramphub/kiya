@@ -40,14 +40,18 @@ func writeTable(keys []backend.Key, target *backend.Profile, filter string) {
 
 	data := make([][]string, 0)
 
-	for _, k := range keys {
+	for i, k := range keys {
 		if len(filter) > 0 {
 			if !caseInsensitiveContains(k.Name, filter) {
 				filteredCount++
 				continue
 			}
 		}
-		data = append(data, []string{fmt.Sprintf("kiya %s copy %s", target.Label, k.Name), k.CreatedAt.Format(time.RFC822), k.Info})
+		cmd := fmt.Sprintf("kiya %s copy %s", target.Label, k.Name)
+		if target.PromptForSecretLine {
+			cmd = fmt.Sprintf("%d kiya %s copy %s", i+1, target.Label, k.Name)
+		}
+		data = append(data, []string{cmd, k.CreatedAt.Format(time.RFC822), k.Info})
 	}
 
 	if len(filter) > 0 {

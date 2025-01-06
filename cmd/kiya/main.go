@@ -388,10 +388,29 @@ func copySecretToClipboard(ctx context.Context, be backend.Backend, target backe
 func listMatchingKeys(ctx context.Context, be backend.Backend, target backend.Profile, filter string) {
 	keys := commandList(ctx, be, &target, filter)
 	writeTable(keys, &target, filter)
+	if len(keys) == 0 {
+		return
+	}
 	// if there is only one match and AutoCopy is enabled
 	// then copy the secret to clipboard
 	if len(keys) == 1 && target.AutoCopyEnabled {
 		copySecretToClipboard(ctx, be, target, keys[0].Name)
-		fmt.Println("... copied secret to clipboard.")
+		fmt.Printf("... copied secret [%s] to clipboard.\n", keys[0].Name)
+		return
+	}
+	// more than one match
+	if target.PromptForSecretLine {
+		fmt.Println("Enter the number of the key to copy to clipboard")
+		var n int
+		_, err := fmt.Scan(&n)
+		if err != nil {
+			return
+		}
+		if n < 1 || n > len(keys) {
+			fmt.Printf("No such line number %d\n", n)
+			return
+		}
+		copySecretToClipboard(ctx, be, target, keys[n-1].Name)
+		fmt.Printf("... copied secret [%s] to clipboard.\n", keys[n-1].Name)
 	}
 }
