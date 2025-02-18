@@ -59,7 +59,7 @@ func (s *AWSParameterStore) List(ctx context.Context, p *Profile) (list []Key, e
 			list = append(list, Key{
 				Name:      *each.Name,
 				CreatedAt: *each.LastModifiedDate,
-				Info:      fmt.Sprintf("type: %s datatype: %s version: %d", *each.DataType, *each.DataType, each.Version),
+				Info:      fmt.Sprintf("type: %s datatype: %s version: %d", each.Type, *each.DataType, each.Version),
 				Owner:     "<Unknown>",
 			})
 		}
