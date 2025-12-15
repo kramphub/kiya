@@ -168,15 +168,19 @@ func main() {
 	case "template":
 		commandTemplate(ctx, b, &target, *oOutputFilename)
 	case "move":
-		// kiya [source] move [source-key] [target] [|target-key]
+		if len(flag.Args()) < 4 {
+			fmt.Println("kiya [profile] move [source-key] [target-profile] [|target-key]")
+			os.Exit(0)
+		}
 		sourceProfile := kiya.Profiles[flag.Arg(0)]
 		sourceKey := flag.Arg(2)
 		targetProfile := kiya.Profiles[flag.Arg(3)]
-		targetKey := sourceKey
+		var targetKey string
 		if len(flag.Args()) == 5 {
 			targetKey = flag.Arg(4)
+		} else {
+			targetKey = sourceKey
 		}
-
 		if shouldPromptForPassword(b) {
 			pass := promptForPassword()
 			b.SetParameter("masterPassword", pass)
