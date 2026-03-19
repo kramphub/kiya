@@ -30,15 +30,15 @@ func TestGenerateSecret(t *testing.T) {
 
 func TestURLEncodingFreeCharset(t *testing.T) {
 	v := url.Values{}
-	v.Set("test", defaultSecreteCharSet)
-	if got, want := v.Encode(), "test="+defaultSecreteCharSet; got != want {
+	v.Set("test", DefaultSecretCharSet)
+	if got, want := v.Encode(), "test="+DefaultSecretCharSet; got != want {
 		t.Errorf("got [%s] want [%s]", got, want)
 	}
 }
 
 func TestGenerateSecretDefaultChars(t *testing.T) {
 	for _, each := range []int{0, 1, 50, 100000} {
-		testGenerateSecret(t, each, "", defaultSecreteCharSet)
+		testGenerateSecret(t, each, "", DefaultSecretCharSet)
 	}
 }
 

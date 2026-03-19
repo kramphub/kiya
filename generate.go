@@ -8,12 +8,12 @@ import (
 
 // default set contains characters that do not required URL encoding
 // the kiya configuration can override this set per profile.
-const defaultSecreteCharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-~"
+const DefaultSecretCharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-~"
 
 // GenerateSecret composes a random secrets using runes from a give set.
 func GenerateSecret(length int, runes []rune) (string, error) {
 	if len(runes) == 0 {
-		runes = []rune(defaultSecreteCharSet)
+		runes = []rune(DefaultSecretCharSet)
 	}
 	var buffer bytes.Buffer
 	for i := 0; i < length; i++ {
