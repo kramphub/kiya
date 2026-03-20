@@ -1,5 +1,16 @@
 # Changes
 
+### v1.16.0
+
+- Add Hashicorp Vault
+- Add `analyse` command
+
+### v1.15.0
+
+- Aws secretmanager
+- do not ask for entry when 1 element list is requested
+- update deps
+
 ### v1.14.0
 
 - Add PromptForCommandLine field to profile.

@@ -72,12 +72,13 @@ The following backends are supported:
 - `asm` - AWS Secrets Manager
 - `akv` - Azure Key Vault
 - `file` - File system
+- `vault` - Hashicorp Vault
  
 If no value is defined for a profile's `backend`, `kms` will be used as a default available for GCP.
 
 ```json
 {
-  "teamF1-on-kms": {
+  "teamF1-on-gcp-kms": {
     "backend": "kms",
     "projectID": "your-gcp-project",
     "location": "global",
@@ -85,7 +86,7 @@ If no value is defined for a profile's `backend`, `kms` will be used as a defaul
     "cryptoKey": "your-kiya-secrets-cryptokey",
     "bucket": "your-kiya-secrets"
   },
-  "teamF2-on-gsm": {
+  "teamF2-on-gcp-gsm": {
     "backend": "gsm",
     "projectID": "another-gcp-project"
   },
@@ -93,13 +94,22 @@ If no value is defined for a profile's `backend`, `kms` will be used as a defaul
     "backend": "file",
     "projectID": "my-file-name"
   },
-  "teamF4-on-akv": {
+  "teamF4-on-azure-akv": {
     "backend": "akv",
     "vaultUrl": "https://<vault-name>.vault.azure.net"
   },
-  "teamF5-on-ssm": {
+  "teamF5-on-aws-ssm": {
     "backend": "ssm",
     "location": "eu-central-1"
+  },
+  "teamF6-on-aws-asm": {
+    "backend": "ssm",
+    "location": "eu-central-1"
+  },
+  "teamF7-on-hashicorp-vault": {
+    "backend": "vault",
+    "vaultUrl": "",
+    "vaultMountPath": ""
   }
 }
 
@@ -138,6 +148,12 @@ Storing or remembering the master password is the responsibility of the user.
 You can use different master passwords for different keys.
 
 For the best security, it is best not to store your master password on the same device as your store.
+
+#### Hashicorp Vault (vault)
+
+TOWRITE
+
+## Commands
 
 ### Store a password, _put_
 
@@ -214,7 +230,7 @@ For accessing OS environment values:
 kiya teamF2 analyse
 ```
 
-## Backup
+### Backup
 
  - You can create encrypted and unencrypted backups of your secrets.
  - Store the public key in the same store or file system
