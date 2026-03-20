@@ -309,6 +309,10 @@ The `list` (which is the default command if no command is given) command will sh
 
 The `list` (which is the default command if no command is given) command will show a table of matches based on the given command line argument. If your profile has `promptForSecretLine` set to true then each line has a number and the tool will prompt for the number to execute the line.
 
+#### Allowed characters
+
+The `generate` command will create and put a new secret using the default characters `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-~` . This set can be specified (override) per profile using the `allowedCharacters` field. For example, a larger set is `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?~`.
+
 ### Limitations
 
 - In this version, the private key can only be retrieved from the file system 

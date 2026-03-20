@@ -114,7 +114,11 @@ func main() {
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
-		secret, err := kiya.GenerateSecret(secretLength, target.SecretRunes)
+		runes := target.SecretRunes
+		if target.AllowedCharacters != "" {
+			runes = []rune(target.AllowedCharacters)
+		}
+		secret, err := kiya.GenerateSecret(secretLength, runes)
 		if err != nil {
 			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}

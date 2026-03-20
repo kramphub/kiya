@@ -29,8 +29,9 @@ type Profile struct {
 	Label               string
 	Location            string
 	SecretRunes         []rune
-	AutoCopyEnabled     bool `json:"autoCopyEnabled"`     // if true then the secret of a single list result will be copied to clipboard
-	PromptForSecretLine bool `json:"promptForSecretLine"` // if true then you must enter a number to run the command on that line
+	AllowedCharacters   string `json:"allowedCharacters"`   // if set then this is the set of characters that will be used to generate secrets for this profile
+	AutoCopyEnabled     bool   `json:"autoCopyEnabled"`     // if true then the secret of a single list result will be copied to clipboard
+	PromptForSecretLine bool   `json:"promptForSecretLine"` // if true then you must enter a number to run the command on that line
 
 	// GCP
 	ProjectID string

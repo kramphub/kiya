@@ -23,6 +23,9 @@ func load(configFile string) (profs map[string]backend.Profile, err error) {
 	for l, p := range profs {
 		each := p
 		each.Label = l
+		if each.AllowedCharacters == "" {
+			each.AllowedCharacters = DefaultSecretCharSet
+		}
 		profs[l] = each
 	}
 	return
