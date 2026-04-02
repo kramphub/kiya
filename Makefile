@@ -3,7 +3,7 @@ releasegen:
 	docker run \
 		--volume "$(CURDIR):/go/src/github.com/kramphub/kiya" \
 		--workdir "/go/src/github.com/kramphub/kiya" \
-		golang:1.14 \
+		golang:1.25 \
 		bash -x etc/bin/releasegen.sh
 
 # go get github.com/aktau/github-release
@@ -38,3 +38,8 @@ uploadrelease:
 		--tag $(shell git describe --abbrev=0 --tags) \
 		--name "kiya-Darwin-x86_64" \
 		--file release/kiya-Darwin-x86_64
+
+# PLATFORM=linux/arm64 IMAGE=github-kramphub-kiya make docker-build
+.PHONY: docker-build
+docker-build:
+	@etc/bin/docker-build.sh
