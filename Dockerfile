@@ -6,11 +6,16 @@ ARG TARGETOS
 ARG TARGETARCH
 RUN mkdir -p /out && \
     cd /src/cmd/kiya && \
-    CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    if [ -n "$VERSION" ]; then \
-      go build -a -ldflags "-s -w -X 'main.version=$VERSION'" -o /out/kiya; \
+    if [ -n "$TARGETOS" ] && [ -n "$TARGETARCH" ]; then \
+      CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build \
+        -a \
+        -ldflags "-s -w -X 'main.version=$VERSION'" \
+        -o /out/kiya; \
     else \
-      go build -a -ldflags "-s -w" -o /out/kiya; \
+      CGO_ENABLED=0 go build \
+        -a \
+        -ldflags "-s -w -X 'main.version=$VERSION'" \
+        -o /out/kiya; \
     fi
 
 FROM alpine
