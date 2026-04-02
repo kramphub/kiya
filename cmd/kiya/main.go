@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azsecrets"
@@ -23,7 +22,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-var version = "build-" + time.Now().String()
+var version = "dev"
 
 const (
 	doPrompt    = true
