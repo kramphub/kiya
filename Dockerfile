@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS build
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine3.23 AS build
 WORKDIR /src
 COPY . .
 ARG VERSION=dev
@@ -18,8 +18,8 @@ RUN mkdir -p /out && \
         -o /out/kiya; \
     fi
 
-FROM alpine
-RUN apk add --no-cache ca-certificates
+FROM alpine:3.23
+RUN apk add --no-cache ca-certificates && apk upgrade --no-cache
 COPY --from=build /out/kiya /usr/bin/kiya
 RUN chmod 755 /usr/bin/kiya
 ENTRYPOINT ["/usr/bin/kiya"]
