@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log/slog"
 
 	"cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
@@ -85,6 +86,7 @@ func (b *KMS) Delete(ctx context.Context, p *Profile, key string) error {
 }
 
 func (b *KMS) List(ctx context.Context, p *Profile) ([]Key, error) {
+	slog.Debug("listing keys", "profile", p.Label, "bucket", p.Bucket)
 	bucket := b.storageClient.Bucket(p.Bucket)
 	query := &storage.Query{}
 	it := bucket.Objects(ctx, query)
