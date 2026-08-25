@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
+	"log/slog"
 
 	"cloud.google.com/go/storage"
 	"github.com/emicklei/tre"
@@ -28,13 +28,13 @@ func NewKMS(kmsService *cloudkms.Service, storageClient *storage.Client) *KMS {
 func (b *KMS) Get(ctx context.Context, p *Profile, key string) ([]byte, error) {
 	encryptedValue, err := b.loadSecret(p, key)
 	if err != nil {
-		log.Fatal(tre.New(err, "get failed", "key", key))
+		fatal(tre.New(err, "get failed", "key", key))
 		return nil, err
 	}
 
 	decryptedValue, err := b.getDecryptedValue(p, encryptedValue)
 	if err != nil {
-		log.Fatal(tre.New(err, "get failed", "cipherText", encryptedValue))
+		fatal(tre.New(err, "get failed", "cipherText", encryptedValue))
 		return nil, err
 	}
 
@@ -86,6 +86,7 @@ func (b *KMS) Delete(ctx context.Context, p *Profile, key string) error {
 }
 
 func (b *KMS) List(ctx context.Context, p *Profile) ([]Key, error) {
+	slog.Debug("listing keys", "profile", p.Label, "bucket", p.Bucket)
 	bucket := b.storageClient.Bucket(p.Bucket)
 	query := &storage.Query{}
 	it := bucket.Objects(ctx, query)

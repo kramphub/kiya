@@ -1,11 +1,10 @@
 package kiya
 
 import (
-	"io/ioutil"
-	"log"
+	"context"
 	"net/http"
+	"os"
 
-	"golang.org/x/net/context"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudkms/v1"
 )
@@ -21,13 +20,13 @@ func NewAuthenticatedClient(authLocation string) *http.Client {
 		// To create a service account client, click "Create new Client ID",
 		// select "Service Account", and click "Create Client ID". A JSON
 		// key file will then be downloaded to your computer.
-		data, err := ioutil.ReadFile(authLocation)
+		data, err := os.ReadFile(authLocation)
 		if err != nil {
-			log.Fatal("unable to read JSON key file", err)
+			fatal("unable to read JSON key file", err)
 		}
 		conf, err := google.JWTConfigFromJSON(data, cloudkms.CloudPlatformScope)
 		if err != nil {
-			log.Fatal("unable to parse JSON key file", err)
+			fatal("unable to parse JSON key file", err)
 		}
 		// Initiate an http.Client. The following GET request will be
 		// authorized and authenticated on the behalf of
@@ -38,7 +37,7 @@ func NewAuthenticatedClient(authLocation string) *http.Client {
 		// See https://g.co/dv/identity/protocols/application-default-credentials
 		defaultClient, err := google.DefaultClient(context.Background(), cloudkms.CloudPlatformScope)
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 		client = defaultClient
 	}

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/emicklei/tre"
 	"github.com/kramphub/kiya/backend"
@@ -22,11 +21,11 @@ func commandMove(
 	if promptForYes(fmt.Sprintf("Are you sure you want to move [%s] from profile [%s] to [%s] in profile [%s] (y/N)",
 		sourceKey, source.Label, targetKey, target.Label)) {
 		if err := move(ctx, b, source, sourceKey, target, targetKey); err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 		fmt.Printf("Successfully moved [%s] to [%s]\n", sourceKey, target.Label)
 	} else {
-		log.Fatalln("move aborted")
+		fatalln("move aborted")
 	}
 }
 

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -17,7 +16,7 @@ import (
 func commandList(ctx context.Context, b backend.Backend, target *backend.Profile, filter string) []backend.Key {
 	keys, err := b.List(ctx, target)
 	if err != nil {
-		log.Fatal(err)
+		fatal(err)
 	}
 
 	filteredKeys := make([]backend.Key, 0)

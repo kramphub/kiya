@@ -2,7 +2,6 @@ package kiya
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"path"
 
@@ -43,7 +42,7 @@ func configLocation(configFile string) string {
 func LoadConfiguration(configFile string) {
 	profs, err := load(configFile)
 	if err != nil {
-		log.Fatal("unable to read/parse kiya configration file ("+configLocation(configFile)+")", err)
+		fatal("unable to read/parse kiya configration file ("+configLocation(configFile)+")", err)
 	}
 	Profiles = profs
 }

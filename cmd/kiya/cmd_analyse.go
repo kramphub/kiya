@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/kramphub/kiya/backend"
@@ -18,7 +18,7 @@ func commandAnalyse(ctx context.Context, b backend.Backend, target *backend.Prof
 	when := time.Now()
 	kv, err := getAllItems(ctx, b, *target, "")
 	if err != nil {
-		log.Printf("error: failed to get all items, %s", err.Error())
+		slog.Error("failed to get all items", "error", err)
 		return
 	}
 	fmt.Printf("loaded all secrets [%d] in %v\n", len(kv), time.Since(when))
