@@ -8,6 +8,7 @@ var (
 	oVersion        = flag.Bool("version", false, "show the version of the tool")
 	oOutputFilename = flag.String("o", "", "if not empty then write the secret to a file else write to stdout (get)")
 	oQuiet          = flag.Bool("quiet", false, "don't prompt for confirmation on destructive actions")
+	oDebug          = flag.Bool("debug", false, "enable debug logging")
 
 	// Backup flags
 	oEncryptBackup          = flag.Bool("encrypt-backup", false, "if true, the backup will be encrypted")

@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/kramphub/kiya/backend"
@@ -30,12 +29,12 @@ func (b *Backup) String() string {
 func (b *Backup) FromString(str string) {
 	buf, err := base64.URLEncoding.DecodeString(str)
 	if err != nil {
-		log.Fatalf("[FATAL] decode from string failed: %s", err.Error())
+		fatalf("[FATAL] decode from string failed: %s", err.Error())
 	}
 
 	err = json.Unmarshal(buf, b)
 	if err != nil {
-		log.Fatalf("[FATAL] decode JSON string failed: %s", err.Error())
+		fatalf("[FATAL] decode JSON string failed: %s", err.Error())
 	}
 }
 
@@ -43,7 +42,7 @@ func (b *Backup) FromString(str string) {
 func (b *Backup) SecretAsBytes() []byte {
 	buf, err := base64.URLEncoding.DecodeString(b.Secret)
 	if err != nil {
-		log.Fatalf("[FATAL] decode secret base64 string failed: %s", err.Error())
+		fatalf("[FATAL] decode secret base64 string failed: %s", err.Error())
 	}
 
 	return buf

@@ -2,9 +2,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"strconv"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/emicklei/tre"
 	"github.com/kramphub/kiya"
 	"github.com/kramphub/kiya/backend"
-	"golang.org/x/net/context"
 	"google.golang.org/api/cloudkms/v1"
 	"google.golang.org/api/option"
 )
@@ -33,6 +33,11 @@ func main() {
 	ctx := context.Background()
 
 	flag.Parse()
+	logLevel := slog.LevelInfo
+	if *oDebug {
+		logLevel = slog.LevelDebug
+	}
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{Level: logLevel})))
 	if *oVersion {
 		fmt.Println("kiya version", version)
 		os.Exit(0)
@@ -48,16 +53,16 @@ func main() {
 	profileName := flag.Arg(0)
 	target, ok := kiya.Profiles[profileName]
 	if !ok {
-		log.Fatalf("no such profile [%s] please check your .kiya file", profileName)
+		fatalf("no such profile [%s] please check your .kiya file", profileName)
 	}
 
 	b, err := getBackend(ctx, &target)
 	if err != nil {
-		log.Fatalf("failed to intialize the secret provider backend, %s", err.Error())
+		fatalf("failed to intialize the secret provider backend, %s", err.Error())
 	}
 	defer func() {
 		if err := b.Close(); err != nil {
-			log.Fatalf("failed to close the secret provider backend, %s", err.Error())
+			fatalf("failed to close the secret provider backend, %s", err.Error())
 		}
 	}()
 
@@ -85,7 +90,7 @@ func main() {
 		value, err := clipboard.ReadAll()
 
 		if err != nil {
-			log.Fatal(tre.New(err, "clipboard read failed", "key", key))
+			fatal(tre.New(err, "clipboard read failed", "key", key))
 		}
 
 		if shouldPromptForPassword(b) {
@@ -111,7 +116,7 @@ func main() {
 
 		secretLength, err := strconv.Atoi(length)
 		if err != nil {
-			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
+			fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
 		runes := target.SecretRunes
 		if target.AllowedCharacters != "" {
@@ -119,7 +124,7 @@ func main() {
 		}
 		secret, err := kiya.GenerateSecret(secretLength, runes)
 		if err != nil {
-			log.Fatal(tre.New(err, "generate failed", "key", key, "err", err))
+			fatal(tre.New(err, "generate failed", "key", key, "err", err))
 		}
 
 		if shouldPromptForPassword(b) {
@@ -132,7 +137,7 @@ func main() {
 		// make it available on the clipboard, ignore error
 		err = clipboard.WriteAll(secret)
 		if err != nil {
-			log.Printf("[WARN] cannot copy public key to clipboard, %s", err.Error())
+			slog.Warn("cannot copy public key to clipboard", "error", err)
 		}
 
 	case "copy":
@@ -149,12 +154,12 @@ func main() {
 
 		bytes, err := b.Get(ctx, &target, key)
 		if err != nil {
-			log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+			fatal(tre.New(err, "get failed", "key", key, "err", err))
 		}
 
 		if len(*oOutputFilename) > 0 {
 			if err := os.WriteFile(*oOutputFilename, bytes, os.ModePerm); err != nil {
-				log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+				fatal(tre.New(err, "get failed", "key", key, "err", err))
 			}
 			return
 		}
@@ -194,7 +199,7 @@ func main() {
 		filter := flag.Arg(2)
 
 		if *oBackupPath == "" {
-			log.Fatalln("--path not specified")
+			fatalln("--path not specified")
 		}
 
 		fmt.Printf("Backup profile '%s', filter: '%s' to %s\n", profileName, filter, *oBackupPath)
@@ -209,31 +214,31 @@ func main() {
 
 		backup, err := commandBackup(ctx, b, target, filter)
 		if err != nil {
-			log.Fatalln(err.Error())
+			fatalln(err.Error())
 		}
 
 		file, err := os.Create(*oBackupPath)
 		if err != nil {
-			log.Fatalf("create file '%s' failed, %s", *oBackupPath, err.Error())
+			fatalf("create file '%s' failed, %s", *oBackupPath, err.Error())
 		}
 
 		if *oEncryptBackup {
 			pub, err := getPublicKey(ctx, b, target, *oBackupKeyStore, *oBackupKey)
 			if err != nil {
-				log.Fatalf("[FATAL] get public key failed, %s", err.Error())
+				fatalf("[FATAL] get public key failed, %s", err.Error())
 			}
 
 			backup.Secret = generateSecret()
 
 			buf, err := encrypt(backup.Data, backup.SecretAsBytes())
 			if err != nil {
-				log.Fatalf("[FATAL] encrypt items failed, %s", err.Error())
+				fatalf("[FATAL] encrypt items failed, %s", err.Error())
 			}
 
 			backup.Data = buf
 			encryptedSecret, err := encryptSecret(backup.Secret, pub)
 			if err != nil {
-				log.Fatalf("[FATAL] encrypt secret failed, %s", err.Error())
+				fatalf("[FATAL] encrypt secret failed, %s", err.Error())
 			}
 			backup.Encrypted = true
 			backup.Secret = encryptedSecret
@@ -242,14 +247,14 @@ func main() {
 		_, err = file.Write([]byte(backup.String()))
 
 		if err != nil {
-			log.Fatalf("save file '%s' failed, %s", *oBackupPath, err.Error())
+			fatalf("save file '%s' failed, %s", *oBackupPath, err.Error())
 		}
 	case "restore":
 		fmt.Printf("Restore profile '%s' from %s\n", profileName, *oBackupPath)
 
 		buf, err := os.ReadFile(*oBackupPath)
 		if err != nil {
-			log.Fatalf("read '%s' failed, %s", *oBackupPath, err.Error())
+			fatalf("read '%s' failed, %s", *oBackupPath, err.Error())
 		}
 
 		backup := Backup{}
@@ -263,22 +268,22 @@ func main() {
 
 			buf, err := os.ReadFile(*oBackupKey)
 			if err != nil {
-				log.Fatalf("[FATAL] read private key '%s' failed, %s", *oBackupKey, err.Error())
+				fatalf("[FATAL] read private key '%s' failed, %s", *oBackupKey, err.Error())
 			}
 
 			privKey := exportPrivateKeyFromPEMString(buf)
 			if err != nil {
-				log.Fatalf("[FATAL] export private key '%s' failed, %s", *oBackupKey, err.Error())
+				fatalf("[FATAL] export private key '%s' failed, %s", *oBackupKey, err.Error())
 			}
 
 			secret, err := decryptSecret(backup.Secret, privKey)
 			if err != nil {
-				log.Fatalf("[FATAL] cannot decrypt secret, %s", err.Error())
+				fatalf("[FATAL] cannot decrypt secret, %s", err.Error())
 			}
 
 			buf, err = decrypt(backup.Data, secret)
 			if err != nil {
-				log.Fatalf("[FATAL] decrypt items failed, %s", err.Error())
+				fatalf("[FATAL] decrypt items failed, %s", err.Error())
 			}
 
 			fmt.Println("Backup decrypted, decode from JSON")
@@ -290,20 +295,20 @@ func main() {
 		fmt.Printf("\rBackend '%s', restoring %d key(s)\n", target.Backend, len(items))
 
 		if items == nil {
-			log.Fatalln("no items found")
+			fatalln("no items found")
 		}
 
 		for k, v := range items {
 			err := b.Put(ctx, &target, k, string(v), *oBackupRestoreOverwrite)
 			if err != nil {
-				log.Printf("[ERROR] put key '%s' failed - %s", k, err.Error())
+				slog.Error("put key failed", "key", k, "error", err)
 			}
 		}
 
 	case "keygen":
 		priv, pub, err := generateKeyPair()
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 
 		path := flag.Arg(2)
@@ -316,17 +321,17 @@ func main() {
 
 		err = saveKeyToFile(pubKeyStr, fmt.Sprintf("%s_pub", path))
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 
 		err = saveKeyToFile(privKeyStr, path)
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 
 		fmt.Printf("Key '%s', '%s_pub' saved\n", path, path)
 		if err := clipboard.WriteAll(pubKeyStr); err != nil {
-			log.Fatal(tre.New(err, "copy failed", err))
+			fatal(tre.New(err, "copy failed", err))
 		}
 		fmt.Println("Public key copied to clipboard")
 
@@ -349,24 +354,24 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		// Create GSM client
 		gsmClient, err := secretmanager.NewClient(ctx)
 		if err != nil {
-			log.Fatalf("failed to setup client: %v", err)
+			fatalf("failed to setup client: %v", err)
 		}
 
 		return backend.NewGSM(gsmClient), nil
 	case "akv":
 		cred, err := azidentity.NewDefaultAzureCredential(nil)
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 		client, err := azsecrets.NewClient(p.VaultUrl, cred, nil)
 		if err != nil {
-			log.Fatalf("failed to create client [%v]", err)
+			fatalf("failed to create client [%v]", err)
 		}
 		return backend.NewAKV(client), nil
 	case "vault":
 		client, err := backend.NewVaultStore(ctx, p.VaultUrl)
 		if err != nil {
-			log.Fatalf("failed to create vault client, %s", err.Error())
+			fatalf("failed to create vault client, %s", err.Error())
 		}
 		return client, nil
 	case "file":
@@ -377,12 +382,12 @@ func getBackend(ctx context.Context, p *backend.Profile) (backend.Backend, error
 		// Create the Google KMS client (must stay here for backwards compatibility)
 		kmsService, err := cloudkms.NewService(ctx, option.WithHTTPClient(kiya.NewAuthenticatedClient(*oAuthLocation)))
 		if err != nil {
-			log.Fatal(err)
+			fatal(err)
 		}
 		// Create the Google Bucket client
 		storageService, err := cloudstore.NewClient(ctx)
 		if err != nil {
-			log.Fatalf("failed to create client [%v]", err)
+			fatalf("failed to create client [%v]", err)
 		}
 
 		return backend.NewKMS(kmsService, storageService), nil
@@ -396,10 +401,10 @@ func copySecretToClipboard(ctx context.Context, be backend.Backend, target backe
 	}
 	value, err := be.Get(ctx, &target, key)
 	if err != nil {
-		log.Fatal(tre.New(err, "get failed", "key", key, "err", err))
+		fatal(tre.New(err, "get failed", "key", key, "err", err))
 	}
 	if err := clipboard.WriteAll(string(value)); err != nil {
-		log.Fatal(tre.New(err, "copy failed", "key", key, "err", err))
+		fatal(tre.New(err, "copy failed", "key", key, "err", err))
 	}
 }
 

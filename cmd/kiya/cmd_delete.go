@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/kramphub/kiya/backend"
 )
@@ -17,6 +16,6 @@ func commandDelete(ctx context.Context, b backend.Backend, target *backend.Profi
 			fmt.Printf("Successfully deleted [%s] from [%s]\n", key, target.Label)
 		}
 	} else {
-		log.Fatalln("delete aborted")
+		fatalln("delete aborted")
 	}
 }

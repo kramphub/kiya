@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"flag"
-	"log"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -31,7 +30,7 @@ func commandTemplate(ctx context.Context, b backend.Backend, target *backend.Pro
 		t, err := processor.ParseFiles(filename)
 		if err != nil {
 			wd, _ := os.Getwd()
-			log.Fatal(tre.New(err, "templating failed", "filename", filename, "current workdirectory", wd))
+			fatal(tre.New(err, "templating failed", "filename", filename, "current workdirectory", wd))
 		}
 		processor = t
 		templateName = filepath.Base(filename)
@@ -39,7 +38,7 @@ func commandTemplate(ctx context.Context, b backend.Backend, target *backend.Pro
 		templateContent := readFromStdIn()
 		t, err := processor.Parse(templateContent)
 		if err != nil {
-			log.Fatal("templating failed", err)
+			fatal("templating failed", err)
 		}
 		processor = t
 	}
@@ -48,7 +47,7 @@ func commandTemplate(ctx context.Context, b backend.Backend, target *backend.Pro
 	if len(outputFilename) > 0 {
 		out, err := os.Create(outputFilename)
 		if err != nil {
-			log.Fatal("unable to create output", err)
+			fatal("unable to create output", err)
 		}
 		writer = out
 	}
@@ -60,7 +59,7 @@ func templateFunction(ctx context.Context, b backend.Backend, target *backend.Pr
 	return func(key string) string {
 		value, err := b.Get(ctx, target, key)
 		if err != nil {
-			log.Fatal(tre.New(err, "templating failed", "key", key))
+			fatal(tre.New(err, "templating failed", "key", key))
 			return ""
 		}
 		return string(value)

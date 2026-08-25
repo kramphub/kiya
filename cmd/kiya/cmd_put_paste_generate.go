@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/kramphub/kiya/backend"
 )
@@ -20,13 +19,13 @@ func commandPutPasteGenerate(
 	overwrite := false
 	if exists, _ := b.CheckExists(ctx, target, key); exists {
 		if mustPrompt && !promptForYes(fmt.Sprintf("Are you sure to overwrite [%s] from [%s] (y/N)? ", key, target.Label)) {
-			log.Fatalln(command + " aborted")
+			fatalln(command + " aborted")
 			return
 		}
 		overwrite = true
 	}
 
 	if err := b.Put(ctx, target, key, value, overwrite); err != nil {
-		log.Fatal(err)
+		fatal(err)
 	}
 }
